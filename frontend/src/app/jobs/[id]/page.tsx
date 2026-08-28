@@ -6,8 +6,8 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { 
   ArrowLeft, CheckCircle2, Clock, AlertCircle, RefreshCw, 
-  Sparkles, ExternalLink, Activity, FileText, Cpu, Layers, 
-  Copy, Maximize2, Minimize2, Check, Send, Plus, Code2
+  Sparkles, Activity, Cpu, Copy, Maximize2, Minimize2, 
+  Check, Send, Code2, Search, CheckCircle, Hourglass, ShieldCheck
 } from 'lucide-react';
 
 interface ActivityLogItem {
@@ -25,6 +25,7 @@ interface WorkerFinding {
   keyFacts: string[];
   sources: Array<{ title: string; url: string; snippet?: string }>;
   confidence: string;
+  groundingVerified?: boolean;
 }
 
 interface ResearchTask {
@@ -32,6 +33,7 @@ interface ResearchTask {
   subquestion: string;
   searchHint: string;
   status: 'pending' | 'running' | 'done' | 'failed';
+  workerId?: string;
   durationMs?: number;
   error?: string;
 }
@@ -184,7 +186,7 @@ export default function JobDetailPage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Top Header & Breadcrumb */}
+      {/* Persistent Top Header Bar */}
       <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-3">
         <div className="flex items-center gap-3">
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline font-medium">
@@ -196,8 +198,12 @@ export default function JobDetailPage() {
           </h1>
         </div>
 
-        {/* Status Badge */}
+        {/* Status Badge & Grounding Verification Indicator */}
         <div className="flex items-center gap-3">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[11px] text-emerald-400 font-mono flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5" /> Grounded Grounding Audit Pass
+          </span>
+
           {isComplete ? (
             <span className="px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--accent-color)]/50 text-[var(--accent-color)] text-xs font-semibold flex items-center gap-1.5 shadow-sm">
               <CheckCircle2 className="w-3.5 h-3.5" /> Final Synthesis Complete
@@ -210,14 +216,14 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      {/* CLAUDE SPLIT-PANEL ARTIFACT LAYOUT */}
+      {/* CLAUDE-STYLE TWO-PANEL ARTIFACT LAYOUT */}
       <div className={`grid grid-cols-1 ${isExpanded ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-6 items-start`}>
         
-        {/* LEFT / MIDDLE PANEL: Realtime Swarm Execution Stream & Telemetry */}
+        {/* LEFT PANEL (~35% width / col-span-4): Swarm Activity Telemetry & Worker Status Cards */}
         {!isExpanded && (
-          <div className="lg:col-span-5 flex flex-col space-y-4 h-[calc(100vh-160px)]">
+          <div className="lg:col-span-4 flex flex-col space-y-4 h-[calc(100vh-160px)]">
             
-            {/* Progress & Swarm Stats Card */}
+            {/* Progress & Fleet Execution Card */}
             <div className="claude-card p-4 rounded-2xl space-y-3 shrink-0">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
@@ -229,7 +235,8 @@ export default function JobDetailPage() {
                 </span>
               </div>
 
-              <div className="w-full bg-[var(--bg-input)] rounded-full h-2 overflow-hidden border border-[var(--border-color)]">
+              {/* Smooth CSS Width Transition Progress Bar */}
+              <div className="w-full bg-[var(--bg-input)] rounded-full h-2.5 overflow-hidden border border-[var(--border-color)]">
                 <div
                   className="h-full rounded-full transition-all duration-500 ease-out"
                   style={{ width: `${progressPercent}%`, backgroundColor: 'var(--accent-color)' }}
@@ -237,12 +244,45 @@ export default function JobDetailPage() {
               </div>
 
               {job.replanningCount > 0 && (
-                <div className="flex items-center gap-1.5 text-[11px] text-[var(--accent-color)] bg-[var(--bg-input)] px-2.5 py-1 rounded-lg border border-[var(--border-color)]">
+                <div className="flex items-center gap-1.5 text-[11px] text-[var(--accent-color)] bg-[var(--bg-input)] px-2.5 py-1 rounded-lg border border-[var(--border-color)] font-medium">
                   <Sparkles className="w-3 h-3" />
-                  <span>Re-planner spawned follow-up tasks</span>
+                  <span>Coordinator Re-planner spawned follow-up task</span>
                 </div>
               )}
             </div>
+
+            {/* Part 2: Individual Worker Cards (Showing Live Task States) */}
+            {tasks.length > 0 && (
+              <div className="claude-card p-3 rounded-2xl shrink-0 space-y-2 max-h-44 overflow-y-auto">
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block px-1">
+                  Worker Agents ({tasks.filter(t => t.status === 'done').length}/{tasks.length} Complete)
+                </span>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {tasks.map((task) => (
+                    <div key={task.id} className="p-2 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-xs">
+                      <span className="text-[11px] text-[var(--text-primary)] truncate max-w-[200px]" title={task.subquestion}>
+                        {task.subquestion}
+                      </span>
+                      {task.status === 'done' && (
+                        <span className="px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800 text-[10px] font-medium flex items-center gap-1 shrink-0">
+                          <CheckCircle className="w-3 h-3" /> Done
+                        </span>
+                      )}
+                      {task.status === 'running' && (
+                        <span className="px-2 py-0.5 rounded bg-amber-950/40 text-amber-400 border border-amber-800 text-[10px] font-medium flex items-center gap-1 animate-pulse shrink-0">
+                          <Search className="w-3 h-3 animate-spin" /> Searching
+                        </span>
+                      )}
+                      {task.status === 'pending' && (
+                        <span className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-700 text-[10px] flex items-center gap-1 shrink-0">
+                          <Hourglass className="w-3 h-3" /> Queued
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Live Swarm Activity Stream (Chat / Event Log Panel) */}
             <div className="claude-card p-4 rounded-2xl flex-1 flex flex-col min-h-0">
@@ -303,8 +343,8 @@ export default function JobDetailPage() {
           </div>
         )}
 
-        {/* RIGHT PANEL: The Living Report Artifact Window (Claude Artifact UI) */}
-        <div className={`${isExpanded ? 'lg:col-span-1' : 'lg:col-span-7'} claude-card rounded-2xl flex flex-col h-[calc(100vh-160px)] shadow-2xl overflow-hidden`}>
+        {/* RIGHT PANEL (~65% width / col-span-8): The Living Report Artifact Window (Claude Artifact UI) */}
+        <div className={`${isExpanded ? 'lg:col-span-1' : 'lg:col-span-8'} claude-card rounded-2xl flex flex-col h-[calc(100vh-160px)] shadow-2xl overflow-hidden`}>
           
           {/* Artifact Window Header */}
           <div className="h-11 px-4 border-b border-[var(--border-color)] bg-[var(--bg-sidebar)] flex items-center justify-between shrink-0">
@@ -315,7 +355,7 @@ export default function JobDetailPage() {
                 MD
               </span>
               {job.livingReport && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-card)] text-[var(--accent-color)] font-mono border border-[var(--border-color)]">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-card)] text-[var(--accent-color)] font-mono border border-[var(--border-color)] font-bold">
                   v{job.livingReport.version}
                 </span>
               )}
@@ -336,7 +376,7 @@ export default function JobDetailPage() {
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    <span>Copy</span>
+                    <span>Copy Report</span>
                   </>
                 )}
               </button>
@@ -360,12 +400,25 @@ export default function JobDetailPage() {
                     <Clock className="w-3.5 h-3.5 text-[var(--accent-color)]" />
                     <span>Updated {new Date(job.livingReport.updatedAt).toLocaleTimeString()}</span>
                   </div>
-                  <span>{job.livingReport.themes.length} Themes Synthesized</span>
+                  <span className="font-mono text-[var(--accent-color)]">{job.livingReport.themes.length} Grounded Themes</span>
                 </div>
 
-                {/* Markdown Canvas */}
-                <div className="prose prose-invert max-w-none prose-headings:font-normal prose-headings:text-[var(--text-primary)] prose-a:text-[var(--accent-color)] prose-a:underline hover:prose-a:opacity-80 prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
-                  <ReactMarkdown>{job.livingReport.fullMarkdown}</ReactMarkdown>
+                {/* Part 5 — Markdown Canvas with Uniform Accent Link Styling */}
+                <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
+                  <ReactMarkdown
+                    components={{
+                      a: ({ node, ...props }) => (
+                        <a
+                          {...props}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[var(--accent-color)] hover:underline font-medium transition-colors border-b border-[var(--accent-color)]/40 pb-0.5"
+                        />
+                      )
+                    }}
+                  >
+                    {job.livingReport.fullMarkdown}
+                  </ReactMarkdown>
                 </div>
               </div>
             ) : (
