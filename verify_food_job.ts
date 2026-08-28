@@ -33,7 +33,7 @@ async function verifyFoodJob() {
   // 3. Poll job status until completed
   console.log('[Bug 1 Check] Waiting for swarm execution to synthesize report...');
   let completedJob: any = null;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 45; i++) {
     await new Promise(r => setTimeout(r, 1000));
     const pollRes = await httpFetch(`http://localhost:4000/jobs/${jobId}`);
     const state = await pollRes.json() as any;

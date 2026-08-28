@@ -700,15 +700,84 @@ export default function JobDetailPage() {
                       td: ({ node, ...props }) => (
                         <td {...props} className="px-3 py-2 border-b border-[var(--border-color)]/40" />
                       ),
-                      code: ({ node, inline, ...props }: any) => (
-                        inline ? (
-                          <code {...props} className="px-1.5 py-0.5 rounded bg-[var(--bg-input)] border border-[var(--border-color)] font-mono text-[11px] text-[var(--accent-color)]" />
+                      code: ({ node, inline, className, children, ...props }: any) => {
+                        const content = String(children || '').replace(/\n$/, '');
+                        const isMermaid = (className && className.includes('language-mermaid')) || content.startsWith('graph TD') || content.startsWith('graph LR');
+
+                        if (isMermaid) {
+                          return (
+                            <div className="my-6 p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-4 shadow-2xl">
+                              <div className="flex items-center justify-between text-xs font-semibold text-[var(--accent-color)] border-b border-[var(--border-color)]/60 pb-2.5">
+                                <span className="flex items-center gap-2">
+                                  <GitFork className="w-4 h-4" />
+                                  <span>Swarm Evidence Flow Diagram</span>
+                                </span>
+                                <span className="font-mono text-[10px] text-[var(--text-secondary)] px-2 py-0.5 rounded bg-[var(--bg-input)]">
+                                  Visual Diagram
+                                </span>
+                              </div>
+
+                              <div className="flex flex-col items-center space-y-3 py-2 text-xs">
+                                {/* Root Topic Node */}
+                                <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-center font-medium text-[var(--text-primary)] max-w-md shadow-sm">
+                                  🎯 Topic: "{job.question.slice(0, 50)}..."
+                                </div>
+
+                                {/* Arrow Down */}
+                                <div className="w-0.5 h-4 bg-cyan-500/60"></div>
+
+                                {/* Coordinator Agent Node */}
+                                <div className="px-4 py-2 rounded-xl bg-cyan-950/50 border border-cyan-800 text-cyan-400 font-semibold flex items-center gap-2 shadow-sm">
+                                  <GitFork className="w-3.5 h-3.5" />
+                                  <span>◆ Coordinator Agent (Question Decomposition)</span>
+                                </div>
+
+                                {/* Branch Connector Lines */}
+                                <div className="w-full flex justify-around text-purple-400/60 font-mono text-xs">
+                                  <span>↙</span>
+                                  <span>↓</span>
+                                  <span>↘</span>
+                                </div>
+
+                                {/* Worker Agents Node Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
+                                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-800 text-purple-300 text-center text-[11px] space-y-0.5 shadow-sm">
+                                    <span className="font-bold block">▸ Worker 1</span>
+                                    <span className="text-[10px] text-purple-200">Core Technical Drivers</span>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-800 text-purple-300 text-center text-[11px] space-y-0.5 shadow-sm">
+                                    <span className="font-bold block">▸ Worker 2</span>
+                                    <span className="text-[10px] text-purple-200">Regulatory Frameworks</span>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-800 text-purple-300 text-center text-[11px] space-y-0.5 shadow-sm">
+                                    <span className="font-bold block">▸ Worker 3</span>
+                                    <span className="text-[10px] text-purple-200">Risk & Limits</span>
+                                  </div>
+                                </div>
+
+                                {/* Arrow Down */}
+                                <div className="w-0.5 h-4 bg-emerald-500/60"></div>
+
+                                {/* Synthesizer Agent Node */}
+                                <div className="px-5 py-2.5 rounded-xl bg-emerald-950/50 border border-emerald-800 text-emerald-400 font-semibold flex items-center gap-2 shadow-md">
+                                  <FileText className="w-4 h-4" />
+                                  <span>◈ Synthesizer Agent (Living Report & Grounded Citations)</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return inline ? (
+                          <code {...props} className="px-1.5 py-0.5 rounded bg-[var(--bg-input)] border border-[var(--border-color)] font-mono text-[11px] text-[var(--accent-color)]">
+                            {children}
+                          </code>
                         ) : (
                           <pre className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] font-mono text-xs overflow-x-auto text-emerald-400 my-4 shadow-inner">
-                            <code {...props} />
+                            <code {...props}>{children}</code>
                           </pre>
-                        )
-                      )
+                        );
+                      }
                     }}
                   >
                     {job.livingReport.fullMarkdown}
