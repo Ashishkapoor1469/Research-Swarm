@@ -218,28 +218,45 @@ export default function JobDetailPage() {
   const progressPercent = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0;
   const isComplete = job.status === 'completed';
 
-  // Derive live "current work" status indicator state
-  const activeRunningTask = tasks.find(t => t.status === 'running');
-  const activePendingTask = tasks.find(t => t.status === 'pending');
+  // STEP 2 & USER DIRECTIVE: Derive dynamic cycle status text & role-matching accent colors from latest activity log
+  const lastLog = job.activityLog && job.activityLog.length > 0 ? job.activityLog[job.activityLog.length - 1] : null;
   
-  let statusText = "Decomposing research question...";
+  let statusText = "Initializing Swarm...";
   let statusColor = "text-[var(--accent-color)]";
   let statusIconAnimated = true;
 
   if (isComplete) {
-    statusText = "Complete";
+    statusText = "Final Synthesis Complete";
     statusColor = "text-emerald-400";
     statusIconAnimated = false;
   } else if (job.status === 'planning') {
-    statusText = "Decomposing question...";
+    statusText = "◆ Coordinator: Decomposing question...";
+    statusColor = "text-cyan-400";
   } else if (job.status === 'synthesizing') {
-    statusText = `Synthesizing living report v${(job.livingReport?.version || 0) + 1}...`;
-  } else if (activeRunningTask) {
-    statusText = `Searching the web & extracting factual evidence...`;
-  } else if (activePendingTask) {
-    statusText = `Queueing next sub-question...`;
+    statusText = `◈ Synthesizer: Compiling living report v${(job.livingReport?.version || 0) + 1}...`;
+    statusColor = "text-emerald-400";
+  } else if (lastLog) {
+    if (lastLog.agent === 'COORDINATOR') {
+      statusText = `◆ Coordinator: ${lastLog.message.replace(/^ℹ️\s*/, '').slice(0, 45)}...`;
+      statusColor = "text-cyan-400";
+    } else if (lastLog.agent === 'WORKER') {
+      const wMatch = lastLog.message.match(/Worker \[(worker-[a-z0-9]+)\]/);
+      const wName = wMatch ? wMatch[1] : 'Agent';
+      statusText = `▸ Worker [${wName}]: ${lastLog.message.replace(/^✅\s*|^Worker\s*\[.*?\]\s*/, '').slice(0, 42)}...`;
+      statusColor = "text-purple-400";
+    } else if (lastLog.agent === 'SYNTHESIZER') {
+      statusText = `◈ Synthesizer: ${lastLog.message.slice(0, 45)}...`;
+      statusColor = "text-emerald-400";
+    } else if (lastLog.agent === 'SYSTEM') {
+      statusText = `⚙ System: ${lastLog.message.slice(0, 45)}...`;
+      statusColor = "text-zinc-400";
+    }
+  } else if (tasks.find(t => t.status === 'running')) {
+    const activeRunningTask = tasks.find(t => t.status === 'running');
+    statusText = `▸ Worker Searching: "${activeRunningTask?.subquestion.slice(0, 35)}..."`;
+    statusColor = "text-purple-400";
   } else if (job.status === 'budget-exhausted-synthesizing') {
-    statusText = `Bounded Task Budget Reached (${job.maxTasks || 20} tasks)`;
+    statusText = `⚠️ Bounded Task Budget Reached (${job.maxTasks || 20} tasks)`;
     statusColor = "text-amber-400";
     statusIconAnimated = false;
   }
