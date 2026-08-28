@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  Plus, ChevronDown, Sparkles, ArrowUp, Mic, Globe, Cpu, Zap, Layers, ShieldCheck 
+  Plus, ChevronDown, ArrowUp, Mic, Cpu
 } from 'lucide-react';
 
 const PRESET_QUESTIONS = [
@@ -63,36 +63,34 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-8 flex flex-col items-center justify-center min-h-[75vh]">
-      {/* Terracotta Sunburst Logo Emblem + Serif Greeting Header (Claude Style) */}
+    <div className="w-full max-w-3xl mx-auto space-y-8 flex flex-col items-center justify-center min-h-[70vh]">
+      {/* Clean Custom Header */}
       <div className="text-center space-y-3">
         <div className="flex items-center justify-center gap-3">
-          {/* Terracotta Sunburst Asterisk Emblem */}
           <span className="text-4xl sm:text-5xl text-[var(--accent-color)] select-none">
-            ✳
+            ✦
           </span>
-          <h1 className="font-serif-claude text-4xl sm:text-5xl text-[var(--text-primary)] tracking-tight">
-            Coffee and Research Swarm time?
+          <h1 className="text-3xl sm:text-4xl font-semibold text-[var(--text-primary)] tracking-tight">
+            What would you like to research today?
           </h1>
         </div>
-        <p className="text-[var(--text-secondary)] text-sm sm:text-base font-normal">
-          Autonomous Multi-Agent Engine powered by Google Cloud & Gemini
+        <p className="text-[var(--text-secondary)] text-xs sm:text-sm font-normal">
+          Autonomous Multi-Agent Swarm Engine powered by Google Cloud & Gemini
         </p>
       </div>
 
-      {/* Main Central Input Card Container (Claude Style) */}
+      {/* Main Central Input Card Container */}
       <div className="w-full">
         <form
           onSubmit={handleSubmit}
           className="w-full claude-card rounded-2xl p-4 space-y-4 shadow-2xl relative border border-[var(--border-color)]"
         >
-          {/* Text Input Area */}
           <textarea
             rows={3}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="How can I help you research today?"
-            className="w-full bg-transparent text-[var(--text-primary)] text-base outline-none resize-none placeholder:text-[var(--text-secondary)]/60 font-normal leading-relaxed"
+            className="w-full bg-transparent text-[var(--text-primary)] text-sm outline-none resize-none placeholder:text-[var(--text-secondary)]/60 font-normal leading-relaxed"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -101,14 +99,12 @@ export default function HomePage() {
             }}
           />
 
-          {/* Bottom Controls Bar inside Input Card */}
           <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]/50">
-            {/* Left Side: + Action button & Mode/Depth Pills */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] transition-colors"
-                title="Add context or files"
+                title="Add context"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -151,9 +147,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Side: Model Selector Dropdown & Submit Arrow */}
             <div className="flex items-center gap-3">
-              {/* Interactive Model Selector Dropdown */}
+              {/* Model Dropdown */}
               <div className="relative">
                 <button
                   type="button"
@@ -205,7 +200,6 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Mic Icon */}
               <button
                 type="button"
                 className="p-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] transition-colors"
@@ -214,7 +208,6 @@ export default function HomePage() {
                 <Mic className="w-4 h-4" />
               </button>
 
-              {/* Submit Button (Claude Style Arrow) */}
               <button
                 type="submit"
                 disabled={isSubmitting || !question.trim()}
@@ -244,7 +237,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Preset Questions List (Claude Style) */}
+      {/* Preset Questions */}
       <div className="w-full space-y-2 pt-2">
         <span className="text-xs text-[var(--text-secondary)] font-medium">Or try a sample research prompt:</span>
         <div className="flex flex-col gap-2">

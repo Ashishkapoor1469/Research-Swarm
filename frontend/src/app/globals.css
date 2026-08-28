@@ -1,80 +1,68 @@
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-serif: 'Newsreader', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  
-  /* Claude Warm Palette Defaults */
-  --bg-main: #141312;
-  --bg-sidebar: #191816;
-  --bg-card: #22201d;
-  --bg-input: #272522;
-  --border-color: #33302b;
-  --accent-color: #d97745;
-  --text-primary: #f0ece1;
-  --text-secondary: #a39e93;
-}
+@layer base {
+  :root {
+    --bg-main: #141312;
+    --bg-sidebar: #191816;
+    --bg-card: #22201d;
+    --bg-input: #272522;
+    --border-color: #33302b;
+    --accent-color: #d97745;
+    --text-primary: #f0ece1;
+    --text-secondary: #a39e93;
+  }
 
-/* Color Theme Palette Classes */
-body.theme-claude {
-  --bg-main: #141312;
-  --bg-sidebar: #181715;
-  --bg-card: #22201d;
-  --bg-input: #272522;
-  --border-color: #33302b;
-  --accent-color: #d97745;
-  --text-primary: #f0ece1;
-  --text-secondary: #a39e93;
-}
+  body.theme-terracotta {
+    --bg-main: #141312;
+    --bg-sidebar: #181715;
+    --bg-card: #22201d;
+    --bg-input: #272522;
+    --border-color: #33302b;
+    --accent-color: #d97745;
+    --text-primary: #f0ece1;
+    --text-secondary: #a39e93;
+  }
 
-body.theme-gemini {
-  --bg-main: #090d16;
-  --bg-sidebar: #0f172a;
-  --bg-card: #131c2e;
-  --bg-input: #1a273e;
-  --border-color: #1e293b;
-  --accent-color: #06b6d4;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-}
+  body.theme-cyan {
+    --bg-main: #090d16;
+    --bg-sidebar: #0f172a;
+    --bg-card: #131c2e;
+    --bg-input: #1a273e;
+    --border-color: #1e293b;
+    --accent-color: #06b6d4;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+  }
 
-body.theme-vertex {
-  --bg-main: #120b18;
-  --bg-sidebar: #191022;
-  --bg-card: #22162e;
-  --bg-input: #2a1c3a;
-  --border-color: #3b2850;
-  --accent-color: #a855f7;
-  --text-primary: #f8fafc;
-  --text-secondary: #a8a29e;
-}
+  body.theme-purple {
+    --bg-main: #120b18;
+    --bg-sidebar: #191022;
+    --bg-card: #22162e;
+    --bg-input: #2a1c3a;
+    --border-color: #3b2850;
+    --accent-color: #a855f7;
+    --text-primary: #f8fafc;
+    --text-secondary: #a8a29e;
+  }
 
-body.theme-emerald {
-  --bg-main: #071410;
-  --bg-sidebar: #0c1f19;
-  --bg-card: #122c24;
-  --bg-input: #18382e;
-  --border-color: #1e473b;
-  --accent-color: #10b981;
-  --text-primary: #ecfdf5;
-  --text-secondary: #94a3b8;
-}
+  body.theme-emerald {
+    --bg-main: #071410;
+    --bg-sidebar: #0c1f19;
+    --bg-card: #122c24;
+    --bg-input: #18382e;
+    --border-color: #1e473b;
+    --accent-color: #10b981;
+    --text-primary: #ecfdf5;
+    --text-secondary: #94a3b8;
+  }
 
-body {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.font-serif-claude {
-  font-family: var(--font-serif);
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
 }
 
 .claude-card {
@@ -93,7 +81,7 @@ body {
   border-right: 1px solid var(--border-color);
 }
 
-/* Custom Scrollbars */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -109,7 +97,7 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Diff Highlight Animation for Living Report updates */
+/* Report updated flash animation */
 @keyframes highlightFlash {
   0% { background-color: rgba(217, 119, 69, 0.25); }
   100% { background-color: transparent; }
