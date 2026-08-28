@@ -148,18 +148,18 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Lightweight Workspace Picker Above Input */}
-      <div className="w-full flex items-center justify-between px-2 text-xs">
-        <div className="flex items-center gap-2">
-          <Folder className="w-4 h-4 text-[var(--accent-color)]" />
-          <span className="font-semibold text-[var(--text-secondary)]">Destination Workspace:</span>
+      {/* Lightweight Workspace Picker Above Input - Responsive Stack */}
+      <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Folder className="w-4 h-4 text-[var(--accent-color)] shrink-0" />
+          <span className="font-semibold text-[var(--text-secondary)] shrink-0">Destination Workspace:</span>
           {loadingWorkspaces ? (
             <span className="text-[var(--text-secondary)] animate-pulse">Loading workspaces...</span>
           ) : workspaces.length > 0 ? (
             <select
               value={selectedWorkspaceId}
               onChange={(e) => setSelectedWorkspaceId(e.target.value)}
-              className="bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] font-medium rounded-lg px-2.5 py-1 outline-none cursor-pointer hover:border-[var(--accent-color)] transition-colors"
+              className="bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] font-medium rounded-lg px-2 py-1 text-xs outline-none cursor-pointer hover:border-[var(--accent-color)] transition-colors max-w-[200px] truncate"
             >
               {workspaces.map((ws) => (
                 <option key={ws.id} value={ws.id}>
@@ -174,7 +174,7 @@ export default function HomePage() {
 
         <button
           onClick={() => setShowWorkspaceModal(true)}
-          className="inline-flex items-center gap-1 text-[var(--accent-color)] hover:underline font-semibold"
+          className="inline-flex items-center gap-1 text-[var(--accent-color)] hover:underline font-semibold self-end sm:self-auto shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>New Workspace</span>
@@ -185,14 +185,14 @@ export default function HomePage() {
       <div className="w-full">
         <form
           onSubmit={handleSubmit}
-          className="w-full claude-card rounded-2xl p-4 space-y-4 shadow-2xl relative border border-[var(--border-color)]"
+          className="w-full claude-card rounded-2xl p-3 sm:p-4 space-y-4 shadow-2xl relative border border-[var(--border-color)] overflow-hidden"
         >
           <textarea
             rows={3}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Enter a broad research topic or complex prompt..."
-            className="w-full bg-transparent text-[var(--text-primary)] text-sm outline-none resize-none placeholder:text-[var(--text-secondary)]/60 font-normal leading-relaxed"
+            className="w-full bg-transparent text-[var(--text-primary)] text-xs sm:text-sm outline-none resize-none placeholder:text-[var(--text-secondary)]/60 font-normal leading-relaxed"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -201,11 +201,11 @@ export default function HomePage() {
             }}
           />
 
-          <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]/50">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[var(--border-color)]/50">
+            <div className="flex items-center gap-2 justify-between sm:justify-start">
               <button
                 type="button"
-                className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] transition-colors"
+                className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] transition-colors shrink-0"
                 title="Add context"
               >
                 <Plus className="w-4 h-4" />
@@ -216,7 +216,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setDepth('quick')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
                     depth === 'quick'
                       ? 'bg-[var(--accent-color)] text-white shadow-sm'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -227,7 +227,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setDepth('standard')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
                     depth === 'standard'
                       ? 'bg-[var(--accent-color)] text-white shadow-sm'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -238,7 +238,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setDepth('deep')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
                     depth === 'deep'
                       ? 'bg-[var(--accent-color)] text-white shadow-sm'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -249,20 +249,20 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between sm:justify-end gap-2">
               {/* Model Dropdown */}
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setShowModelDropdown(!showModelDropdown)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--border-color)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] font-medium transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--border-color)] border border-[var(--border-color)] text-[11px] sm:text-xs text-[var(--text-primary)] font-medium transition-colors cursor-pointer"
                 >
-                  <Cpu className="w-3.5 h-3.5 text-[var(--accent-color)]" />
-                  <span>{selectedModel.name}</span>
-                  <span className="text-[10px] px-1 py-0.2 rounded bg-[var(--border-color)] text-[var(--accent-color)]">
+                  <Cpu className="w-3.5 h-3.5 text-[var(--accent-color)] shrink-0" />
+                  <span className="truncate max-w-[110px] sm:max-w-none">{selectedModel.name}</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-[var(--border-color)] text-[var(--accent-color)] hidden sm:inline">
                     {selectedModel.badge}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                  <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)] shrink-0" />
                 </button>
 
                 {showModelDropdown && (
