@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { 
   ArrowLeft, CheckCircle2, Clock, AlertCircle, RefreshCw, 
   Sparkles, Activity, Cpu, Copy, Maximize2, Minimize2, 
@@ -648,6 +649,7 @@ export default function JobDetailPage() {
                 {/* Rendered Markdown Canvas */}
                 <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
                     components={{
                       a: ({ node, ...props }) => (
                         <a
@@ -690,79 +692,72 @@ export default function JobDetailPage() {
                         );
                       },
                       table: ({ node, ...props }) => (
-                        <div className="my-4 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] p-1">
-                          <table {...props} className="w-full text-xs text-left text-[var(--text-primary)]" />
+                        <div className="my-5 overflow-x-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-input)] p-1.5 shadow-xl">
+                          <table {...props} className="w-full text-xs text-left text-[var(--text-primary)] border-collapse" />
                         </div>
                       ),
                       th: ({ node, ...props }) => (
-                        <th {...props} className="px-3 py-2 bg-[var(--bg-card)] border-b border-[var(--border-color)] font-semibold text-[var(--accent-color)]" />
+                        <th {...props} className="px-3.5 py-2.5 bg-[var(--bg-card)] border-b border-[var(--border-color)] font-semibold text-[var(--accent-color)] text-[11px] tracking-wider uppercase" />
                       ),
                       td: ({ node, ...props }) => (
-                        <td {...props} className="px-3 py-2 border-b border-[var(--border-color)]/40" />
+                        <td {...props} className="px-3.5 py-2.5 border-b border-[var(--border-color)]/30 text-xs font-normal" />
                       ),
                       code: ({ node, inline, className, children, ...props }: any) => {
                         const content = String(children || '').replace(/\n$/, '');
                         const isMermaid = (className && className.includes('language-mermaid')) || content.startsWith('graph TD') || content.startsWith('graph LR');
 
                         if (isMermaid) {
+                          // Extract node labels dynamically from mermaid definition
+                          const nodes: string[] = [];
+                          const lines = content.split('\n');
+                          lines.forEach(l => {
+                            const matches = l.match(/\["(.*?)"\]/g);
+                            if (matches) {
+                              matches.forEach(m => {
+                                const clean = m.replace(/^\["/, '').replace(/"\]$/, '');
+                                if (!nodes.includes(clean)) nodes.push(clean);
+                              });
+                            }
+                          });
+
                           return (
                             <div className="my-6 p-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-4 shadow-2xl">
                               <div className="flex items-center justify-between text-xs font-semibold text-[var(--accent-color)] border-b border-[var(--border-color)]/60 pb-2.5">
                                 <span className="flex items-center gap-2">
-                                  <GitFork className="w-4 h-4" />
-                                  <span>Swarm Evidence Flow Diagram</span>
+                                  <Activity className="w-4 h-4 text-emerald-400" />
+                                  <span>Topic Process & Content Flowchart</span>
                                 </span>
-                                <span className="font-mono text-[10px] text-[var(--text-secondary)] px-2 py-0.5 rounded bg-[var(--bg-input)]">
-                                  Visual Diagram
+                                <span className="font-mono text-[10px] text-emerald-400 px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-800 font-bold">
+                                  Grounded Visual Flow
                                 </span>
                               </div>
 
-                              <div className="flex flex-col items-center space-y-3 py-2 text-xs">
-                                {/* Root Topic Node */}
-                                <div className="px-4 py-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] text-center font-medium text-[var(--text-primary)] max-w-md shadow-sm">
-                                  🎯 Topic: "{job.question.slice(0, 50)}..."
-                                </div>
-
-                                {/* Arrow Down */}
-                                <div className="w-0.5 h-4 bg-cyan-500/60"></div>
-
-                                {/* Coordinator Agent Node */}
-                                <div className="px-4 py-2 rounded-xl bg-cyan-950/50 border border-cyan-800 text-cyan-400 font-semibold flex items-center gap-2 shadow-sm">
-                                  <GitFork className="w-3.5 h-3.5" />
-                                  <span>◆ Coordinator Agent (Question Decomposition)</span>
-                                </div>
-
-                                {/* Branch Connector Lines */}
-                                <div className="w-full flex justify-around text-purple-400/60 font-mono text-xs">
-                                  <span>↙</span>
-                                  <span>↓</span>
-                                  <span>↘</span>
-                                </div>
-
-                                {/* Worker Agents Node Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full">
-                                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-800 text-purple-300 text-center text-[11px] space-y-0.5 shadow-sm">
-                                    <span className="font-bold block">▸ Worker 1</span>
-                                    <span className="text-[10px] text-purple-200">Core Technical Drivers</span>
+                              <div className="flex flex-col items-center space-y-2 py-2 text-xs">
+                                {nodes.length > 0 ? (
+                                  nodes.map((nodeLabel, nIdx) => (
+                                    <React.Fragment key={`node-${nIdx}`}>
+                                      <div className={`w-full max-w-lg p-3 rounded-xl border text-center font-medium shadow-sm transition-transform hover:scale-[1.01] ${
+                                        nIdx === 0 ? 'bg-cyan-950/40 border-cyan-800 text-cyan-300' :
+                                        nIdx === nodes.length - 1 ? 'bg-emerald-950/40 border-emerald-800 text-emerald-300 font-bold' :
+                                        'bg-[var(--bg-input)] border-[var(--border-color)] text-[var(--text-primary)]'
+                                      }`}>
+                                        <span className="text-[10px] font-mono font-semibold text-[var(--text-secondary)] block mb-0.5 uppercase tracking-wider">
+                                          Step 0{nIdx + 1}
+                                        </span>
+                                        <span className="text-xs">{nodeLabel}</span>
+                                      </div>
+                                      {nIdx < nodes.length - 1 && (
+                                        <div className="flex flex-col items-center my-0.5 text-xs text-[var(--accent-color)] animate-pulse font-bold">
+                                          ↓
+                                        </div>
+                                      )}
+                                    </React.Fragment>
+                                  ))
+                                ) : (
+                                  <div className="p-4 text-center text-xs text-[var(--text-secondary)]">
+                                    Parsing process flowchart...
                                   </div>
-                                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-800 text-purple-300 text-center text-[11px] space-y-0.5 shadow-sm">
-                                    <span className="font-bold block">▸ Worker 2</span>
-                                    <span className="text-[10px] text-purple-200">Regulatory Frameworks</span>
-                                  </div>
-                                  <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-800 text-purple-300 text-center text-[11px] space-y-0.5 shadow-sm">
-                                    <span className="font-bold block">▸ Worker 3</span>
-                                    <span className="text-[10px] text-purple-200">Risk & Limits</span>
-                                  </div>
-                                </div>
-
-                                {/* Arrow Down */}
-                                <div className="w-0.5 h-4 bg-emerald-500/60"></div>
-
-                                {/* Synthesizer Agent Node */}
-                                <div className="px-5 py-2.5 rounded-xl bg-emerald-950/50 border border-emerald-800 text-emerald-400 font-semibold flex items-center gap-2 shadow-md">
-                                  <FileText className="w-4 h-4" />
-                                  <span>◈ Synthesizer Agent (Living Report & Grounded Citations)</span>
-                                </div>
+                                )}
                               </div>
                             </div>
                           );
