@@ -49,6 +49,7 @@ export interface ResearchJob {
   id: string;
   question: string;
   depth: JobDepth;
+  model?: string;
   status: JobStatus;
   createdAt: string;
   updatedAt: string;
