@@ -251,11 +251,11 @@ export default function WorkspaceDetailPage() {
             </div>
           </div>
         ) : (
-          <div className="flex items-start justify-between gap-4 pt-1">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
                 <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: workspace.color || '#d97745' }}></span>
-                <h1 className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-semibold text-[var(--text-primary)] tracking-tight">
                   {workspace.name}
                 </h1>
                 <button

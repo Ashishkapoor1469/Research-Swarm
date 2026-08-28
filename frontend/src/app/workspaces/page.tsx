@@ -83,9 +83,9 @@ export default function WorkspacesPage() {
   return (
     <div className="w-full space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-color)]/60 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--text-primary)] tracking-tight">
+          <h1 className="text-xl sm:text-3xl font-semibold text-[var(--text-primary)] tracking-tight">
             Research Workspaces
           </h1>
           <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
@@ -95,7 +95,7 @@ export default function WorkspacesPage() {
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="py-2 px-4 rounded-xl bg-[var(--accent-color)] text-white text-xs font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
+          className="py-2.5 px-4 rounded-xl bg-[var(--accent-color)] text-white text-xs font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm cursor-pointer shrink-0"
         >
           <FolderPlus className="w-4 h-4" />
           <span>New Workspace</span>

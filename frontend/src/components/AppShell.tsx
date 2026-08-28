@@ -75,12 +75,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen w-full font-sans">
-      {/* Left Sidebar */}
+    <div className="flex min-h-screen w-full font-sans overflow-x-hidden">
+      {/* Mobile Drawer Backdrop Overlay */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity" 
+        />
+      )}
+
+      {/* Left Sidebar (Responsive Overlay Drawer on Mobile, Relative Panel on Desktop) */}
       <aside
         className={`${
-          sidebarOpen ? 'w-64' : 'w-0 -translate-x-full'
-        } transition-all duration-300 ease-in-out border-r border-[var(--border-color)] bg-[var(--bg-sidebar)] flex flex-col justify-between shrink-0 relative z-30 overflow-hidden`}
+          sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full md:w-0'
+        } fixed md:relative inset-y-0 left-0 transition-all duration-300 ease-in-out border-r border-[var(--border-color)] bg-[var(--bg-sidebar)] flex flex-col justify-between shrink-0 z-50 overflow-hidden shadow-2xl md:shadow-none`}
       >
         <div className="p-3 space-y-4">
           {/* Logo */}
@@ -90,11 +98,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 Research Swarm
               </span>
             </Link>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden p-1 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
+              ✕
+            </button>
           </div>
 
           {/* + New Swarm Button */}
           <Link
             href="/"
+            onClick={() => setSidebarOpen(false)}
             className="w-full py-2.5 px-3.5 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--border-color)] border border-[var(--border-color)] text-[var(--text-primary)] font-medium text-xs flex items-center gap-2.5 transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4 text-[var(--accent-color)]" />
@@ -105,6 +120,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <nav className="space-y-0.5 text-xs text-[var(--text-secondary)]">
             <Link 
               href="/workspaces" 
+              onClick={() => setSidebarOpen(false)}
               className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-primary)] font-medium transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -129,7 +145,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <div className="pt-2 border-t border-[var(--border-color)]/60 space-y-1">
             <div className="flex items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-secondary)]">
               <span>Workspace Tree</span>
-              <Link href="/workspaces" title="New Workspace">
+              <Link href="/workspaces" onClick={() => setSidebarOpen(false)} title="New Workspace">
                 <FolderPlus className="w-3.5 h-3.5 cursor-pointer hover:text-[var(--text-primary)] text-[var(--accent-color)]" />
               </Link>
             </div>
@@ -158,6 +174,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
                       <Link
                         href={`/workspaces/${ws.id}`}
+                        onClick={() => setSidebarOpen(false)}
                         className="text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] font-mono"
                       >
                         ({ws.fileCount})
@@ -176,6 +193,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             <Link
                               key={job.id}
                               href={`/jobs/${job.id}`}
+                              onClick={() => setSidebarOpen(false)}
                               className="block px-2 py-1 rounded-md text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] truncate transition-colors"
                             >
                               📄 {job.fileName || job.question}
@@ -211,19 +229,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navigation */}
-        <header className="h-14 px-4 border-b border-[var(--border-color)]/50 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md bg-[var(--bg-main)]/80">
-          <div className="flex items-center gap-3">
-            {!sidebarOpen && (
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                title="Expand Sidebar"
-              >
-                <PanelLeft className="w-4 h-4" />
-              </button>
-            )}
-            <span className="font-semibold text-sm text-[var(--text-primary)]">
+        {/* Top Navigation Bar */}
+        <header className="h-14 px-3 sm:px-4 border-b border-[var(--border-color)]/50 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md bg-[var(--bg-main)]/80">
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              title="Toggle Navigation Sidebar"
+            >
+              <PanelLeft className="w-4 h-4" />
+            </button>
+            <span className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] truncate">
               Research Swarm
             </span>
           </div>
