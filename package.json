@@ -1,0 +1,36 @@
+{
+  "name": "research-swarm",
+  "version": "1.0.0",
+  "description": "Autonomous multi-agent research swarm powered by Google Cloud & Gemini",
+  "main": "server/index.ts",
+  "scripts": {
+    "dev:server": "ts-node server/index.ts",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:frontend\"",
+    "build:server": "tsc -p tsconfig.json",
+    "build:frontend": "npm run build --prefix frontend",
+    "build": "npm run build:server && npm run build:frontend",
+    "start": "node dist/server/index.js"
+  },
+  "keywords": ["gemini", "agentic", "research-swarm", "google-cloud", "firestore", "pubsub"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "*",
+    "@google-cloud/firestore": "^7.11.0",
+    "@google-cloud/pubsub": "^4.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.13.5",
+    "@types/uuid": "^10.0.0",
+    "concurrently": "^9.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
