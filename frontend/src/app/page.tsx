@@ -276,7 +276,7 @@ export default function HomePage() {
                 </button>
 
                 {showModelDropdown && (
-                  <div className="absolute right-0 top-full sm:bottom-full sm:top-auto mt-2 sm:mb-2 w-64 sm:w-72 max-w-[calc(100vw-32px)] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 space-y-1">
+                  <div className="absolute right-0 top-full mt-2 w-64 sm:w-72 max-w-[calc(100vw-32px)] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 space-y-1">
                     <div className="px-3 py-1.5 text-[10px] uppercase font-semibold text-[var(--text-secondary)] tracking-wider">
                       Select Swarm Reasoning Model
                     </div>
