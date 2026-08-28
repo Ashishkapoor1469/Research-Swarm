@@ -7,12 +7,13 @@ import ReactMarkdown from 'react-markdown';
 import { 
   ArrowLeft, CheckCircle2, Clock, AlertCircle, RefreshCw, 
   Sparkles, Activity, Cpu, Copy, Maximize2, Minimize2, 
-  Check, Send, Code2, Search, CheckCircle, Hourglass, ShieldCheck
+  Check, Send, Code2, Search, CheckCircle, Hourglass, ShieldCheck,
+  ChevronDown, ChevronUp, User
 } from 'lucide-react';
 
 interface ActivityLogItem {
   timestamp: string;
-  agent: 'COORDINATOR' | 'WORKER' | 'SYNTHESIZER' | 'SYSTEM';
+  agent: 'COORDINATOR' | 'WORKER' | 'SYNTHESIZER' | 'SYSTEM' | 'USER';
   message: string;
   metadata?: any;
 }
@@ -80,7 +81,11 @@ export default function JobDetailPage() {
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [reportFlash, setReportFlash] = useState(false);
+  
+  // Step 2 & 3: Live status indicator accordion & Follow-up chat state
+  const [statusAccordionOpen, setStatusAccordionOpen] = useState(false);
   const [followupText, setFollowupText] = useState('');
+  const [isSubmittingFollowup, setIsSubmittingFollowup] = useState(false);
   
   const prevVersionRef = useRef<number>(0);
   const activityEndRef = useRef<HTMLDivElement>(null);
@@ -159,6 +164,32 @@ export default function JobDetailPage() {
     }
   };
 
+  async function handleSendFollowup(e: React.FormEvent) {
+    e.preventDefault();
+    if (!followupText.trim() || isSubmittingFollowup || !job) return;
+
+    const msg = followupText.trim();
+    setFollowupText('');
+    setIsSubmittingFollowup(true);
+
+    try {
+      const res = await fetch(`/api/jobs/${job.id}/followup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to submit follow-up request.');
+      }
+    } catch (err) {
+      console.error('Error submitting follow-up:', err);
+    } finally {
+      setIsSubmittingFollowup(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
@@ -181,8 +212,37 @@ export default function JobDetailPage() {
     );
   }
 
-  const progressPercent = job.tasksTotal > 0 ? Math.round((job.tasksCompleted / job.tasksTotal) * 100) : 0;
+  // STEP 1 FIX: Single Source of Truth for task counts (Derived directly from live tasks array!)
+  const tasksTotal = tasks.length;
+  const tasksCompleted = tasks.filter(t => t.status === 'done').length;
+  const progressPercent = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0;
   const isComplete = job.status === 'completed';
+
+  // STEP 2: Derive live "current work" status indicator state
+  const activeRunningTask = tasks.find(t => t.status === 'running');
+  const activePendingTask = tasks.find(t => t.status === 'pending');
+  
+  let statusText = "Decomposing research question...";
+  let statusColor = "text-[var(--accent-color)]";
+  let statusIconAnimated = true;
+
+  if (isComplete) {
+    statusText = "Complete";
+    statusColor = "text-emerald-400";
+    statusIconAnimated = false;
+  } else if (job.status === 'planning') {
+    statusText = "Decomposing question...";
+  } else if (job.status === 'synthesizing') {
+    statusText = `Synthesizing living report v${(job.livingReport?.version || 0) + 1}...`;
+  } else if (activeRunningTask) {
+    statusText = `Searching the web & extracting factual evidence...`;
+  } else if (activePendingTask) {
+    statusText = `Queueing next sub-question...`;
+  } else if (job.status === 'budget-exhausted-synthesizing') {
+    statusText = `Bounded Task Budget Reached (${job.maxTasks || 20} tasks)`;
+    statusColor = "text-amber-400";
+    statusIconAnimated = false;
+  }
 
   return (
     <div className="w-full space-y-4">
@@ -223,7 +283,45 @@ export default function JobDetailPage() {
         {!isExpanded && (
           <div className="lg:col-span-4 flex flex-col space-y-4 h-[calc(100vh-160px)]">
             
-            {/* Progress & Fleet Execution Card */}
+            {/* STEP 2: Live "Current Work" Status Indicator (Claude "✳ Contemplating" Style) */}
+            <div className="claude-card rounded-2xl border border-[var(--border-color)] p-3 shrink-0 space-y-2 shadow-md">
+              <button
+                onClick={() => setStatusAccordionOpen(!statusAccordionOpen)}
+                className="w-full flex items-center justify-between text-xs text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`text-base select-none ${statusIconAnimated ? 'animate-pulse text-[var(--accent-color)]' : statusColor}`}>
+                    {isComplete ? '✓' : '✳'}
+                  </span>
+                  <span className={`font-semibold text-xs ${statusColor}`}>
+                    {statusText}
+                  </span>
+                </div>
+                {statusAccordionOpen ? (
+                  <ChevronUp className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                )}
+              </button>
+
+              {/* Expandable Accordion for Live Active Details */}
+              {statusAccordionOpen && (
+                <div className="pt-2 border-t border-[var(--border-color)]/60 text-[11px] text-[var(--text-secondary)] space-y-1">
+                  {activeRunningTask && (
+                    <div className="p-2 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)]">
+                      <span className="font-semibold text-[var(--text-primary)] block">Active Sub-Question:</span>
+                      <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">"{activeRunningTask.subquestion}"</p>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-[10px] font-mono pt-1">
+                    <span>Active Re-planning Iteration: #{job.replanningCount}</span>
+                    <span>Max Task Budget: {job.maxTasks || 20}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Progress & Fleet Execution Card (Step 1 Consolidated Count) */}
             <div className="claude-card p-4 rounded-2xl space-y-3 shrink-0">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
@@ -231,7 +329,7 @@ export default function JobDetailPage() {
                   <span>Fleet Execution</span>
                 </span>
                 <span className="font-mono text-[var(--accent-color)] font-bold">
-                  {job.tasksCompleted}/{job.tasksTotal} Done ({progressPercent}%)
+                  {tasksCompleted}/{tasksTotal} Done ({progressPercent}%)
                 </span>
               </div>
 
@@ -251,11 +349,11 @@ export default function JobDetailPage() {
               )}
             </div>
 
-            {/* Part 2: Individual Worker Cards (Showing Live Task States) */}
+            {/* Individual Worker Cards (Derived from same single live tasks array) */}
             {tasks.length > 0 && (
               <div className="claude-card p-3 rounded-2xl shrink-0 space-y-2 max-h-44 overflow-y-auto">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block px-1">
-                  Worker Agents ({tasks.filter(t => t.status === 'done').length}/{tasks.length} Complete)
+                  Worker Agents ({tasksCompleted}/{tasksTotal} Complete)
                 </span>
                 <div className="grid grid-cols-1 gap-1.5">
                   {tasks.map((task) => (
@@ -296,45 +394,51 @@ export default function JobDetailPage() {
 
               {/* Event Log Stream */}
               <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs">
-                {job.activityLog.map((item, idx) => (
-                  <div key={idx} className="p-2.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]/60 space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-semibold text-[var(--accent-color)] flex items-center gap-1.5">
-                        {item.agent === 'COORDINATOR' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--accent-color)] text-[10px]">COORDINATOR</span>}
-                        {item.agent === 'WORKER' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--text-primary)] text-[10px]">WORKER</span>}
-                        {item.agent === 'SYNTHESIZER' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--accent-color)] text-[10px]">SYNTHESIZER</span>}
-                        {item.agent === 'SYSTEM' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--text-secondary)] text-[10px]">SYSTEM</span>}
-                      </span>
-                      <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
+                {job.activityLog.map((item, idx) => {
+                  const isUser = item.metadata?.agent === 'USER' || item.agent === ('USER' as any);
+                  return (
+                    <div key={idx} className={`p-2.5 rounded-xl border space-y-1 ${isUser ? 'bg-[var(--bg-card)] border-[var(--accent-color)]/50' : 'bg-[var(--bg-input)] border-[var(--border-color)]/60'}`}>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-[var(--accent-color)] flex items-center gap-1.5">
+                          {isUser && <span className="px-1.5 py-0.2 rounded bg-[var(--accent-color)] text-white text-[10px] font-bold flex items-center gap-1"><User className="w-3 h-3" /> USER</span>}
+                          {!isUser && item.agent === 'COORDINATOR' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--accent-color)] text-[10px]">COORDINATOR</span>}
+                          {!isUser && item.agent === 'WORKER' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--text-primary)] text-[10px]">WORKER</span>}
+                          {!isUser && item.agent === 'SYNTHESIZER' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--accent-color)] text-[10px]">SYNTHESIZER</span>}
+                          {!isUser && item.agent === 'SYSTEM' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--text-secondary)] text-[10px]">SYSTEM</span>}
+                        </span>
+                        <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
+                      </div>
+                      <p className="text-[var(--text-primary)] leading-relaxed text-[11px]">{item.message}</p>
                     </div>
-                    <p className="text-[var(--text-primary)] leading-relaxed text-[11px]">{item.message}</p>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={activityEndRef} />
               </div>
 
-              {/* Follow-up Prompt Input Box */}
+              {/* STEP 3: Wired Follow-up Prompt Input Box */}
               <div className="pt-3 border-t border-[var(--border-color)]/60 mt-3 shrink-0">
                 <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (!followupText.trim()) return;
-                    setFollowupText('');
-                  }}
+                  onSubmit={handleSendFollowup}
                   className="flex items-center gap-2 bg-[var(--bg-input)] p-1.5 rounded-xl border border-[var(--border-color)]"
                 >
                   <input
                     type="text"
                     value={followupText}
                     onChange={(e) => setFollowupText(e.target.value)}
-                    placeholder="Ask follow-up or redirect research..."
-                    className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none px-2 placeholder:text-[var(--text-secondary)]/60"
+                    disabled={isSubmittingFollowup}
+                    placeholder={isSubmittingFollowup ? "Coordinator evaluating follow-up request..." : "Ask follow-up or redirect research..."}
+                    className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none px-2 placeholder:text-[var(--text-secondary)]/60 disabled:opacity-50"
                   />
                   <button
                     type="submit"
-                    className="p-1.5 rounded-lg bg-[var(--accent-color)] text-white hover:opacity-90 transition-opacity"
+                    disabled={isSubmittingFollowup || !followupText.trim()}
+                    className="p-1.5 rounded-lg bg-[var(--accent-color)] text-white hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    {isSubmittingFollowup ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Send className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </form>
               </div>
@@ -403,7 +507,7 @@ export default function JobDetailPage() {
                   <span className="font-mono text-[var(--accent-color)]">{job.livingReport.themes.length} Grounded Themes</span>
                 </div>
 
-                {/* Part 5 — Markdown Canvas with Uniform Accent Link Styling */}
+                {/* Markdown Canvas with Uniform Accent Link Styling */}
                 <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
                   <ReactMarkdown
                     components={{

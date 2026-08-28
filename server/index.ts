@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { dbStore } from '../lib/firestore';
 import { ResearchJob, JobDepth } from '../lib/types';
 import { initializeSwarmOrchestrator, launchNewJob } from './swarm_runner';
+import { GeminiService } from '../lib/gemini';
 
 dotenv.config();
 
@@ -228,6 +229,104 @@ app.delete('/jobs/:id', async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Error deleting job:', err);
     return res.status(500).json({ error: 'Failed to delete job.' });
+  }
+});
+
+// POST /jobs/:id/followup - Wire Follow-Up Chat Input to Swarm Re-planner
+app.post('/jobs/:id/followup', async (req: Request, res: Response) => {
+  try {
+    const jobId = req.params.id;
+    const { message } = req.body;
+
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return res.status(400).json({ error: 'Follow-up message is required.' });
+    }
+
+    const job = await dbStore.getJob(jobId);
+    if (!job) return res.status(404).json({ error: 'Job not found.' });
+
+    const findings = await dbStore.getFindings(jobId);
+    const existingTasks = await dbStore.getTasks(jobId);
+
+    // 1. Log USER follow-up request to activity feed
+    await dbStore.addActivityLog(jobId, 'SYSTEM', `💬 User requested follow-up: "${message.trim()}"`, {
+      agent: 'USER',
+      message: message.trim()
+    });
+
+    // 2. Evaluate intent with Coordinator Agent
+    const evalResult = await GeminiService.evaluateFollowupPrompt(job.question, message.trim(), findings);
+
+    if (evalResult.intent === 'direct_answer' || !evalResult.subquestions || evalResult.subquestions.length === 0) {
+      // Coordinator answers directly without new tasks
+      await dbStore.addActivityLog(
+        jobId,
+        'COORDINATOR',
+        `💡 Coordinator Answer: ${evalResult.answerText || 'Existing research findings already address your request.'}`
+      );
+      return res.json({ message: 'Coordinator answered directly.', intent: 'direct_answer' });
+    }
+
+    // 3. Budget Guard Check
+    const currentTaskCount = existingTasks.length;
+    const allowedNewTasks = Math.min(evalResult.subquestions.length, Math.max(0, (job.maxTasks || 20) - currentTaskCount));
+
+    if (allowedNewTasks <= 0) {
+      await dbStore.addActivityLog(
+        jobId,
+        'COORDINATOR',
+        `⚠️ Task budget limit reached (${job.maxTasks || 20} max tasks). Unable to spawn additional follow-up tasks.`
+      );
+      return res.json({ message: 'Task budget limit reached.', intent: 'budget_exceeded' });
+    }
+
+    // 4. Spawn follow-up tasks
+    const newSubqs = evalResult.subquestions.slice(0, allowedNewTasks);
+    await dbStore.addActivityLog(
+      jobId,
+      'COORDINATOR',
+      `🎯 Coordinator re-planner spawned ${newSubqs.length} follow-up sub-questions based on your request: "${message.trim()}"`
+    );
+
+    // Update job status back to in_progress
+    await dbStore.updateJob(jobId, {
+      status: 'in_progress',
+      tasksTotal: currentTaskCount + newSubqs.length,
+      replanningCount: (job.replanningCount || 0) + 1
+    });
+
+    // Publish new tasks to Pub/Sub
+    const taskPubSubBus = require('./swarm_runner').taskPubSubBus;
+    for (let i = 0; i < newSubqs.length; i++) {
+      const subq = newSubqs[i];
+      const taskId = `task-followup-${i + 1}-${uuidv4().slice(0, 8)}`;
+      const newTask = {
+        id: taskId,
+        jobId,
+        subquestion: subq.subquestion,
+        searchHint: subq.searchHint,
+        status: 'pending' as const,
+        attempts: 0,
+        maxAttempts: 3,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await dbStore.addTask(newTask);
+      await taskPubSubBus.publishTask({
+        jobId,
+        taskId,
+        subquestion: subq.subquestion,
+        searchHint: subq.searchHint,
+        attempt: 1
+      });
+    }
+
+    return res.json({ message: `Dispatched ${newSubqs.length} follow-up tasks.`, intent: 'spawn_tasks' });
+
+  } catch (err) {
+    console.error('Error processing follow-up request:', err);
+    return res.status(500).json({ error: 'Failed to process follow-up request.' });
   }
 });
 

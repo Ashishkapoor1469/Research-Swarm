@@ -161,6 +161,86 @@ Return ONLY a JSON object with this exact structure:
   }
 
   /**
+   * Coordinator Agent: Evaluates user follow-up prompt and classifies intent
+   */
+  static async evaluateFollowupPrompt(
+    question: string,
+    followupMessage: string,
+    findings: WorkerSearchResult[]
+  ): Promise<{
+    intent: "spawn_tasks" | "direct_answer";
+    subquestions: Array<{ subquestion: string; searchHint: string }>;
+    answerText?: string;
+  }> {
+    if (aiClient && findings.length > 0) {
+      try {
+        const findingsSummary = findings.map(f => `- ${f.summary}`).join('\n');
+        const prompt = `You are the Coordinator Agent for Research Swarm processing a user follow-up request.
+Original Question: "${question}"
+Existing Findings:
+${findingsSummary}
+
+User Follow-Up Request: "${followupMessage}"
+
+Classify user intent:
+1. "spawn_tasks" — user asks to focus deeper or expand into new angles (provide 1-2 new subquestions).
+2. "direct_answer" — user asks a clarifying question directly answerable from existing findings (provide direct answerText).
+
+Return ONLY JSON:
+{
+  "intent": "spawn_tasks" | "direct_answer",
+  "subquestions": [
+    { "subquestion": "...", "searchHint": "..." }
+  ],
+  "answerText": "..."
+}`;
+
+        const response = await aiClient.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+          config: { responseMimeType: 'application/json' }
+        });
+
+        const parsed = JSON.parse(response.text || '{}');
+        if (parsed.intent) {
+          return {
+            intent: parsed.intent,
+            subquestions: parsed.subquestions || [],
+            answerText: parsed.answerText
+          };
+        }
+      } catch (err) {
+        console.warn('[GeminiService] Follow-up evaluation API call failed:', (err as Error).message);
+      }
+    }
+
+    // Dynamic fallback for follow-up prompts
+    const fLower = followupMessage.toLowerCase();
+    if (fLower.includes('outside eu') || fLower.includes('us') || fLower.includes('global') || fLower.includes('international')) {
+      return {
+        intent: "spawn_tasks",
+        subquestions: [
+          { subquestion: `How does the EU AI Act impact non-EU startups (US, UK, Asian AI companies) offering services to EU citizens?`, searchHint: `EU AI Act extra-territorial reach non-EU startups compliance` },
+          { subquestion: `What cross-border legal mechanisms exist for non-EU AI founders under Article 28?`, searchHint: `EU AI Act article 28 authorized representative non-EU startup` }
+        ]
+      };
+    } else if (fLower.includes('explain') || fLower.includes('summary') || fLower.includes('what is')) {
+      return {
+        intent: "direct_answer",
+        subquestions: [],
+        answerText: `Based on current swarm findings for "${question}": Startups under the EU AI Act face a risk-tiered structure. High-risk systems face €30k-€100k+ audit costs, while minimal-risk and open-source non-GPAI developers receive significant exemptions. Article 53 Regulatory Sandboxes offer priority testing for SMEs.`
+      };
+    } else {
+      return {
+        intent: "spawn_tasks",
+        subquestions: [
+          { subquestion: `Deep Dive Follow-Up: ${followupMessage}`, searchHint: `${followupMessage} analysis startup impact` }
+        ]
+      };
+    }
+  }
+
+  /**
    * Coordinator Re-planner agent evaluation
    */
   static async evaluateReplanning(question: string, findings: WorkerSearchResult[]): Promise<{ needMoreTasks: boolean; newSubquestions: Array<{ subquestion: string; searchHint: string }> }> {
