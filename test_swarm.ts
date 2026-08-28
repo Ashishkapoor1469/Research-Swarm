@@ -11,6 +11,14 @@ async function runEndToEndTest() {
   // Initialize swarm event subscribers
   initializeSwarmOrchestrator();
 
+  // Create throwaway test workspace
+  const testWorkspace = await dbStore.createWorkspace(
+    'user-test-swarm',
+    'Swarm Engine Test Workspace',
+    'Throwaway workspace for end-to-end swarm execution tests'
+  );
+  console.log(`[Test Setup] Created test workspace [${testWorkspace.id}]`);
+
   // SCENARIO 1: Standard End-to-End Async Swarm Execution
   const jobId = `job-test-${uuidv4().slice(0, 8)}`;
   const question = "How is the EU AI Act going to affect small AI startups?";
@@ -20,6 +28,8 @@ async function runEndToEndTest() {
 
   await dbStore.createJob({
     id: jobId,
+    workspaceId: testWorkspace.id,
+    fileName: 'EU AI Act Startup Analysis',
     question,
     depth: 'standard',
     status: 'planning',
@@ -56,6 +66,7 @@ async function runEndToEndTest() {
 
   console.log('\n================ SCENARIO 1 VERIFICATION ================');
   console.log(`Job ID:                 ${finalJob?.id}`);
+  console.log(`Workspace ID:           ${finalJob?.workspaceId}`);
   console.log(`Final Status:           ${finalJob?.status}`);
   console.log(`Tasks Created:          ${tasks.length}`);
   console.log(`Tasks Completed:        ${finalJob?.tasksCompleted}/${finalJob?.tasksTotal}`);
@@ -80,6 +91,8 @@ async function runEndToEndTest() {
 
   await dbStore.createJob({
     id: resJobId,
+    workspaceId: testWorkspace.id,
+    fileName: 'Quantum Security Risks',
     question: "What are the quantum security risks for enterprise SaaS in 2026?",
     depth: 'quick',
     status: 'planning',
@@ -113,6 +126,7 @@ async function runEndToEndTest() {
 
   console.log('\n================ SCENARIO 2 RESILIENCE RESULTS ================');
   console.log(`Job ID:                 ${resJob?.id}`);
+  console.log(`Workspace ID:           ${resJob?.workspaceId}`);
   console.log(`Final Status:           ${resJob?.status}`);
   console.log(`Tasks Created:          ${resTasks.length}`);
   console.log(`Tasks Completed:        ${resJob?.tasksCompleted}/${resJob?.tasksTotal}`);

@@ -4,42 +4,68 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Plus, Folder, FileText, Code2, Sliders, Pin, 
-  PanelLeft, ChevronDown, Palette
+  PanelLeft, ChevronDown, ChevronRight, Palette, FolderPlus, Sparkles
 } from 'lucide-react';
 
 export type ModelOption = 'gemini-2.5-flash' | 'gemini-2.0-pro' | 'gemini-1.5-pro' | 'claude-3.5-sonnet';
 export type ThemeOption = 'theme-terracotta' | 'theme-cyan' | 'theme-purple' | 'theme-emerald';
 
+interface Workspace {
+  id: string;
+  name: string;
+  color?: string;
+  fileCount: number;
+}
+
+interface ResearchJob {
+  id: string;
+  workspaceId: string;
+  fileName?: string;
+  question: string;
+}
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedTheme, setSelectedTheme] = useState<ThemeOption>('theme-terracotta');
   const [showThemeDropdown, setShowThemeDropdown] = useState(false);
-  const [recentJobs, setRecentJobs] = useState<Array<{ id: string; question: string }>>([]);
+  
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [recentJobs, setRecentJobs] = useState<ResearchJob[]>([]);
+  const [expandedWorkspaces, setExpandedWorkspaces] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     document.body.className = selectedTheme;
   }, [selectedTheme]);
 
   useEffect(() => {
-    async function loadRecentJobs() {
+    async function loadData() {
       try {
-        const res = await fetch('/api/jobs');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            setRecentJobs(data.slice(0, 8).map((j: any) => ({ id: j.id, question: j.question })));
+        const [wsRes, jobsRes] = await Promise.all([
+          fetch('/api/workspaces'),
+          fetch('/api/jobs')
+        ]);
+        if (wsRes.ok) {
+          const wsData = await wsRes.json();
+          setWorkspaces(wsData || []);
+          // Expand first workspace by default
+          if (wsData && wsData.length > 0) {
+            setExpandedWorkspaces({ [wsData[0].id]: true });
           }
         }
+        if (jobsRes.ok) {
+          const jobsData = await jobsRes.json();
+          setRecentJobs(jobsData || []);
+        }
       } catch (e) {
-        setRecentJobs([
-          { id: 'job-1', question: 'How is the EU AI Act going to affect small AI startups?' },
-          { id: 'job-2', question: 'Technical hurdles & market forecast for AI Swarms 2026' },
-          { id: 'job-3', question: 'Venture Capital due diligence automation via agents' }
-        ]);
+        console.error('Error loading sidebar data:', e);
       }
     }
-    loadRecentJobs();
+    loadData();
   }, []);
+
+  const toggleWorkspaceExpand = (id: string) => {
+    setExpandedWorkspaces(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const themeLabels: Record<ThemeOption, { name: string; color: string }> = {
     'theme-terracotta': { name: 'Amber Terracotta', color: '#d97745' },
@@ -77,14 +103,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Navigation Menu */}
           <nav className="space-y-0.5 text-xs text-[var(--text-secondary)]">
-            <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-primary)] font-medium transition-colors">
-              <Folder className="w-4 h-4" />
-              <span>Projects</span>
-            </a>
-            <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] transition-colors">
-              <FileText className="w-4 h-4" />
-              <span>Living Reports & Artifacts</span>
-            </a>
+            <Link 
+              href="/workspaces" 
+              className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] text-[var(--text-primary)] font-medium transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Folder className="w-4 h-4 text-[var(--accent-color)]" />
+                <span>Workspaces</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-input)] text-[var(--accent-color)] font-mono font-bold">
+                {workspaces.length}
+              </span>
+            </Link>
+
             <a href="#" className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] transition-colors">
               <div className="flex items-center gap-3">
                 <Code2 className="w-4 h-4" />
@@ -92,39 +123,70 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--border-color)] text-[var(--accent-color)] font-mono">PRO</span>
             </a>
-            <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-card)] transition-colors">
-              <Sliders className="w-4 h-4" />
-              <span>Customize Fleet</span>
-            </a>
           </nav>
 
-          {/* Pinned Projects */}
-          <div className="pt-2 border-t border-[var(--border-color)]/60">
-            <div className="flex items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-secondary)]">
-              <span>Pinned Workspace</span>
-              <Plus className="w-3.5 h-3.5 cursor-pointer hover:text-[var(--text-primary)]" />
-            </div>
-            <div className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] italic">
-              <Pin className="w-3.5 h-3.5" />
-              <span>Pin tasks to keep them here</span>
-            </div>
-          </div>
-
-          {/* History */}
+          {/* Workspaces Tree Navigation (Workspace -> Files) */}
           <div className="pt-2 border-t border-[var(--border-color)]/60 space-y-1">
             <div className="flex items-center justify-between px-2 py-1 text-xs font-semibold text-[var(--text-secondary)]">
-              <span>Recent Research Tasks</span>
+              <span>Workspace Tree</span>
+              <Link href="/workspaces" title="New Workspace">
+                <FolderPlus className="w-3.5 h-3.5 cursor-pointer hover:text-[var(--text-primary)] text-[var(--accent-color)]" />
+              </Link>
             </div>
-            <div className="space-y-0.5 max-h-56 overflow-y-auto pr-1">
-              {recentJobs.map((j) => (
-                <Link
-                  key={j.id}
-                  href={`/jobs/${j.id}`}
-                  className="block px-3 py-1.5 rounded-lg text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] truncate transition-colors"
-                >
-                  • {j.question}
-                </Link>
-              ))}
+
+            <div className="space-y-1 max-h-72 overflow-y-auto pr-1">
+              {workspaces.map((ws) => {
+                const isExpanded = !!expandedWorkspaces[ws.id];
+                const wsJobs = recentJobs.filter(j => j.workspaceId === ws.id);
+
+                return (
+                  <div key={ws.id} className="space-y-0.5">
+                    {/* Workspace Header Row */}
+                    <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-[var(--bg-card)] text-xs text-[var(--text-primary)] transition-colors group">
+                      <button
+                        onClick={() => toggleWorkspaceExpand(ws.id)}
+                        className="flex items-center gap-2 truncate flex-1 text-left"
+                      >
+                        {isExpanded ? (
+                          <ChevronDown className="w-3 h-3 text-[var(--text-secondary)] shrink-0" />
+                        ) : (
+                          <ChevronRight className="w-3 h-3 text-[var(--text-secondary)] shrink-0" />
+                        )}
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: ws.color || '#d97745' }}></span>
+                        <span className="truncate font-medium">{ws.name}</span>
+                      </button>
+
+                      <Link
+                        href={`/workspaces/${ws.id}`}
+                        className="text-[10px] text-[var(--text-secondary)] group-hover:text-[var(--accent-color)] font-mono"
+                      >
+                        ({ws.fileCount})
+                      </Link>
+                    </div>
+
+                    {/* Files inside Workspace */}
+                    {isExpanded && (
+                      <div className="pl-6 space-y-0.5">
+                        {wsJobs.length === 0 ? (
+                          <span className="block px-2 py-1 text-[11px] text-[var(--text-secondary)]/60 italic">
+                            No files yet
+                          </span>
+                        ) : (
+                          wsJobs.slice(0, 5).map((job) => (
+                            <Link
+                              key={job.id}
+                              href={`/jobs/${job.id}`}
+                              className="block px-2 py-1 rounded-md text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-input)] truncate transition-colors"
+                            >
+                              📄 {job.fileName || job.question}
+                            </Link>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

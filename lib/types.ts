@@ -2,6 +2,17 @@ export type JobDepth = "quick" | "standard" | "deep";
 export type JobStatus = "planning" | "in_progress" | "synthesizing" | "completed" | "failed" | "budget-exhausted-synthesizing";
 export type TaskStatus = "pending" | "running" | "done" | "failed";
 
+export interface Workspace {
+  id: string;
+  ownerId: string;        // user id
+  name: string;           // e.g. "Food Research"
+  description?: string;
+  createdAt: string;      // ISO timestamp string
+  updatedAt: string;      // ISO timestamp string
+  fileCount: number;      // denormalized count for fast list rendering
+  color?: string;         // optional UI accent color, user-selectable
+}
+
 export interface ResearchTask {
   id: string;
   jobId: string;
@@ -47,6 +58,8 @@ export interface LivingReport {
 
 export interface ResearchJob {
   id: string;
+  workspaceId: string;    // required — every job belongs to a workspace
+  fileName?: string;      // user-editable display name for this report file, defaults to question text if unset
   question: string;
   depth: JobDepth;
   model?: string;

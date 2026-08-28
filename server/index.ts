@@ -17,13 +17,115 @@ app.use(express.json());
 // Initialize background swarm orchestrator
 initializeSwarmOrchestrator();
 
-// 1. POST /jobs - Job Intake Endpoint (Non-blocking walk away moment)
+// ==================== WORKSPACES API ====================
+
+// POST /workspaces - Create a new Workspace
+app.post('/workspaces', async (req: Request, res: Response) => {
+  try {
+    const { name, description, color, ownerId = 'user-default' } = req.body;
+
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return res.status(400).json({ error: 'Workspace name is required.' });
+    }
+
+    const workspace = await dbStore.createWorkspace(ownerId, name, description, color);
+    return res.status(201).json(workspace);
+  } catch (err) {
+    console.error('Error creating workspace:', err);
+    return res.status(500).json({ error: 'Failed to create workspace.' });
+  }
+});
+
+// GET /workspaces - List current user's workspaces
+app.get('/workspaces', async (req: Request, res: Response) => {
+  try {
+    const ownerId = (req.query.ownerId as string) || 'user-default';
+    const list = await dbStore.listWorkspaces(ownerId);
+    return res.json(list);
+  } catch (err) {
+    console.error('Error listing workspaces:', err);
+    return res.status(500).json({ error: 'Failed to list workspaces.' });
+  }
+});
+
+// GET /workspaces/:id - Get workspace details
+app.get('/workspaces/:id', async (req: Request, res: Response) => {
+  try {
+    const ws = await dbStore.getWorkspace(req.params.id);
+    if (!ws) return res.status(404).json({ error: 'Workspace not found.' });
+    return res.json(ws);
+  } catch (err) {
+    console.error('Error getting workspace:', err);
+    return res.status(500).json({ error: 'Failed to retrieve workspace.' });
+  }
+});
+
+// PATCH /workspaces/:id - Edit / rename workspace
+app.patch('/workspaces/:id', async (req: Request, res: Response) => {
+  try {
+    const { name, description, color } = req.body;
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      return res.status(400).json({ error: 'Workspace name cannot be empty.' });
+    }
+
+    const updated = await dbStore.renameWorkspace(req.params.id, name, description, color);
+    if (!updated) return res.status(404).json({ error: 'Workspace not found.' });
+    return res.json(updated);
+  } catch (err) {
+    console.error('Error updating workspace:', err);
+    return res.status(500).json({ error: 'Failed to update workspace.' });
+  }
+});
+
+// DELETE /workspaces/:id - Cascade-delete workspace (Requires ?confirm=true)
+app.delete('/workspaces/:id', async (req: Request, res: Response) => {
+  try {
+    const isConfirmed = req.query.confirm === 'true' || req.body?.confirm === true;
+    if (!isConfirmed) {
+      return res.status(400).json({
+        error: 'Explicit confirmation required to delete a workspace. Pass ?confirm=true in query or { confirm: true } in body.'
+      });
+    }
+
+    const deleted = await dbStore.deleteWorkspace(req.params.id, true);
+    if (!deleted) return res.status(404).json({ error: 'Workspace not found.' });
+    return res.json({ message: `Workspace [${req.params.id}] and all associated research files deleted successfully.` });
+  } catch (err) {
+    console.error('Error deleting workspace:', err);
+    return res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+// GET /workspaces/:id/jobs - List research files (jobs) in workspace
+app.get('/workspaces/:id/jobs', async (req: Request, res: Response) => {
+  try {
+    const jobs = await dbStore.listJobsInWorkspace(req.params.id);
+    return res.json(jobs);
+  } catch (err) {
+    console.error('Error listing jobs in workspace:', err);
+    return res.status(500).json({ error: 'Failed to list research files in workspace.' });
+  }
+});
+
+// ==================== JOBS API ====================
+
+// 1. POST /jobs - Job Intake Endpoint (Requires workspaceId)
 app.post('/jobs', async (req: Request, res: Response) => {
   try {
-    const { question, depth = 'standard' } = req.body;
+    const { question, depth = 'standard', workspaceId, fileName, model } = req.body;
 
     if (!question || typeof question !== 'string' || question.trim().length < 5) {
       return res.status(400).json({ error: 'Valid research question is required (at least 5 characters).' });
+    }
+
+    if (!workspaceId || typeof workspaceId !== 'string' || workspaceId.trim().length === 0) {
+      return res.status(400).json({ error: 'workspaceId is required. Every research file belongs to an explicit workspace.' });
+    }
+
+    // Verify workspace exists
+    const ws = await dbStore.getWorkspace(workspaceId);
+    if (!ws) {
+      return res.status(404).json({ error: `Workspace [${workspaceId}] not found.` });
     }
 
     const validDepth: JobDepth = ['quick', 'standard', 'deep'].includes(depth) ? depth : 'standard';
@@ -31,8 +133,11 @@ app.post('/jobs', async (req: Request, res: Response) => {
 
     const newJob: ResearchJob = {
       id: jobId,
+      workspaceId: workspaceId.trim(),
+      fileName: fileName?.trim() || question.trim(),
       question: question.trim(),
       depth: validDepth,
+      model: model || 'gemini-2.5-flash',
       status: 'planning',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -45,7 +150,7 @@ app.post('/jobs', async (req: Request, res: Response) => {
         {
           timestamp: new Date().toISOString(),
           agent: 'SYSTEM',
-          message: `Job created. Depth: "${validDepth}" (Max Tasks: ${req.body.maxTasks || (validDepth === 'quick' ? 8 : validDepth === 'deep' ? 25 : 20)}, Timeout: ${req.body.maxDurationMinutes || 90}m). Invoking Coordinator Agent...`
+          message: `Job created in Workspace "${ws.name}". Depth: "${validDepth}". Invoking Coordinator Agent...`
         }
       ]
     };
@@ -70,7 +175,26 @@ app.post('/jobs', async (req: Request, res: Response) => {
   }
 });
 
-// 2. GET /jobs/:id - Query Job State
+// GET /jobs - List all jobs
+app.get('/jobs', async (req: Request, res: Response) => {
+  try {
+    const ownerId = (req.query.ownerId as string) || 'user-default';
+    const workspaces = await dbStore.listWorkspaces(ownerId);
+    const allJobs: ResearchJob[] = [];
+
+    for (const ws of workspaces) {
+      const jobs = await dbStore.listJobsInWorkspace(ws.id);
+      allJobs.push(...jobs);
+    }
+
+    return res.json(allJobs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+  } catch (err) {
+    console.error('Error listing all jobs:', err);
+    return res.status(500).json({ error: 'Failed to list jobs.' });
+  }
+});
+
+// GET /jobs/:id - Query Job State
 app.get('/jobs/:id', async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
@@ -94,7 +218,20 @@ app.get('/jobs/:id', async (req: Request, res: Response) => {
   }
 });
 
-// 3. GET /jobs/:id/events - Realtime SSE Stream for Frontend Live Updates
+// DELETE /jobs/:id - Delete single research job
+app.delete('/jobs/:id', async (req: Request, res: Response) => {
+  try {
+    const jobId = req.params.id;
+    const deleted = await dbStore.deleteJob(jobId);
+    if (!deleted) return res.status(404).json({ error: 'Job not found.' });
+    return res.json({ message: `Job [${jobId}] deleted successfully.` });
+  } catch (err) {
+    console.error('Error deleting job:', err);
+    return res.status(500).json({ error: 'Failed to delete job.' });
+  }
+});
+
+// GET /jobs/:id/events - Realtime SSE Stream for Frontend Live Updates
 app.get('/jobs/:id/events', async (req: Request, res: Response) => {
   const jobId = req.params.id;
 
@@ -114,10 +251,8 @@ app.get('/jobs/:id/events', async (req: Request, res: Response) => {
     }
   };
 
-  // Send initial data
   await sendUpdate();
 
-  // Subscribe to DB updates for this job
   const listener = async () => {
     await sendUpdate();
   };
@@ -134,7 +269,7 @@ app.get('/jobs/:id/events', async (req: Request, res: Response) => {
   });
 });
 
-// 4. GET /jobs/:id/timeline - Per-task Observability & Parallel Execution Metrics
+// GET /jobs/:id/timeline - Per-task Observability & Parallel Execution Metrics
 app.get('/jobs/:id/timeline', async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
@@ -182,7 +317,9 @@ app.get('/jobs/:id/timeline', async (req: Request, res: Response) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Research Swarm Server running on http://localhost:${PORT}`);
-  console.log(`   POST /jobs        - Submit broad research question`);
-  console.log(`   GET  /jobs/:id    - Poll job progress & living report`);
-  console.log(`   GET  /jobs/:id/events - Realtime SSE stream for UI`);
+  console.log(`   POST   /workspaces     - Create workspace`);
+  console.log(`   GET    /workspaces     - List workspaces`);
+  console.log(`   DELETE /workspaces/:id - Cascade delete workspace (?confirm=true)`);
+  console.log(`   POST   /jobs           - Submit research job (requires workspaceId)`);
+  console.log(`   GET    /jobs/:id       - Query job state`);
 });
