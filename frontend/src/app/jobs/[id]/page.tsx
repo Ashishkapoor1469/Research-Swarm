@@ -18,6 +18,7 @@ interface ActivityLogItem {
 
 interface WorkerFinding {
   id: string;
+  taskId?: string;
   subquestion: string;
   summary: string;
   keyFacts: string[];
