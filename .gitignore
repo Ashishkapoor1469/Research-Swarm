@@ -23,3 +23,10 @@ Thumbs.db
 *.log
 npm-debug.log*
 yarn-debug.log*
+
+# Local Database & Test Scratch Files
+data/
+data/db_store.json
+data/scraped_pages/
+verify_food_job.ts
+test_deep_job.ts
