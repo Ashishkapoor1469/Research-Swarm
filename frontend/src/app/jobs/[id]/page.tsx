@@ -8,7 +8,7 @@ import {
   ArrowLeft, CheckCircle2, Clock, AlertCircle, RefreshCw, 
   Sparkles, Activity, Cpu, Copy, Maximize2, Minimize2, 
   Check, Send, Code2, Search, CheckCircle, Hourglass, ShieldCheck,
-  ChevronDown, ChevronUp, User
+  ChevronDown, ChevronUp, User, Cog, GitFork, Bot, FileText, FileCode
 } from 'lucide-react';
 
 interface ActivityLogItem {
@@ -82,7 +82,6 @@ export default function JobDetailPage() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [reportFlash, setReportFlash] = useState(false);
   
-  // Step 2 & 3: Live status indicator accordion & Follow-up chat state
   const [statusAccordionOpen, setStatusAccordionOpen] = useState(false);
   const [followupText, setFollowupText] = useState('');
   const [isSubmittingFollowup, setIsSubmittingFollowup] = useState(false);
@@ -212,13 +211,13 @@ export default function JobDetailPage() {
     );
   }
 
-  // STEP 1 FIX: Single Source of Truth for task counts (Derived directly from live tasks array!)
+  // Single Source of Truth for task counts (Derived directly from live tasks array)
   const tasksTotal = tasks.length;
   const tasksCompleted = tasks.filter(t => t.status === 'done').length;
   const progressPercent = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0;
   const isComplete = job.status === 'completed';
 
-  // STEP 2: Derive live "current work" status indicator state
+  // Derive live "current work" status indicator state
   const activeRunningTask = tasks.find(t => t.status === 'running');
   const activePendingTask = tasks.find(t => t.status === 'pending');
   
@@ -246,7 +245,7 @@ export default function JobDetailPage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Persistent Top Header Bar */}
+      {/* Top Header Bar */}
       <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-3">
         <div className="flex items-center gap-3">
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline font-medium">
@@ -258,7 +257,7 @@ export default function JobDetailPage() {
           </h1>
         </div>
 
-        {/* Status Badge & Grounding Verification Indicator */}
+        {/* Grounded Audit Pass Badge & Status Pill */}
         <div className="flex items-center gap-3">
           <span className="px-2.5 py-1 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[11px] text-emerald-400 font-mono flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5" /> Grounded Grounding Audit Pass
@@ -276,14 +275,14 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      {/* CLAUDE-STYLE TWO-PANEL ARTIFACT LAYOUT */}
+      {/* 3-COLUMN RESTRUCTURED LAYOUT (Column 1 is AppShell Sidebar, Column 2 is Activity & Chat, Column 3 is Living Report) */}
       <div className={`grid grid-cols-1 ${isExpanded ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-6 items-start`}>
         
-        {/* LEFT PANEL (~35% width / col-span-4): Swarm Activity Telemetry & Worker Status Cards */}
+        {/* COLUMN 2 (Middle, ~35% width / col-span-5): Activity & Chat Pane */}
         {!isExpanded && (
-          <div className="lg:col-span-4 flex flex-col space-y-4 h-[calc(100vh-160px)]">
+          <div className="lg:col-span-5 flex flex-col space-y-4 h-[calc(100vh-160px)]">
             
-            {/* STEP 2: Live "Current Work" Status Indicator (Claude "✳ Contemplating" Style) */}
+            {/* ✳ Live "Current Work" Status Indicator */}
             <div className="claude-card rounded-2xl border border-[var(--border-color)] p-3 shrink-0 space-y-2 shadow-md">
               <button
                 onClick={() => setStatusAccordionOpen(!statusAccordionOpen)}
@@ -321,11 +320,11 @@ export default function JobDetailPage() {
               )}
             </div>
 
-            {/* Progress & Fleet Execution Card (Step 1 Consolidated Count) */}
+            {/* ⚙ Fleet Execution Progress Bar */}
             <div className="claude-card p-4 rounded-2xl space-y-3 shrink-0">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                  <Cpu className="w-4 h-4 text-[var(--accent-color)]" />
+                  <Cog className="w-4 h-4 text-[var(--accent-color)]" />
                   <span>Fleet Execution</span>
                 </span>
                 <span className="font-mono text-[var(--accent-color)] font-bold">
@@ -349,9 +348,9 @@ export default function JobDetailPage() {
               )}
             </div>
 
-            {/* Individual Worker Cards (Derived from same single live tasks array) */}
+            {/* Worker Agents List */}
             {tasks.length > 0 && (
-              <div className="claude-card p-3 rounded-2xl shrink-0 space-y-2 max-h-44 overflow-y-auto">
+              <div className="claude-card p-3 rounded-2xl shrink-0 space-y-2 max-h-40 overflow-y-auto">
                 <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block px-1">
                   Worker Agents ({tasksCompleted}/{tasksTotal} Complete)
                 </span>
@@ -359,7 +358,7 @@ export default function JobDetailPage() {
                   {tasks.map((task) => (
                     <div key={task.id} className="p-2 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-xs">
                       <span className="text-[11px] text-[var(--text-primary)] truncate max-w-[200px]" title={task.subquestion}>
-                        {task.subquestion}
+                        ▸ {task.subquestion}
                       </span>
                       {task.status === 'done' && (
                         <span className="px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800 text-[10px] font-medium flex items-center gap-1 shrink-0">
@@ -382,7 +381,7 @@ export default function JobDetailPage() {
               </div>
             )}
 
-            {/* Live Swarm Activity Stream (Chat / Event Log Panel) */}
+            {/* Live Swarm Activity Telemetry Feed with Role Icons */}
             <div className="claude-card p-4 rounded-2xl flex-1 flex flex-col min-h-0">
               <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-2.5 mb-3 shrink-0">
                 <h3 className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-2">
@@ -397,14 +396,14 @@ export default function JobDetailPage() {
                 {job.activityLog.map((item, idx) => {
                   const isUser = item.metadata?.agent === 'USER' || item.agent === ('USER' as any);
                   return (
-                    <div key={idx} className={`p-2.5 rounded-xl border space-y-1 ${isUser ? 'bg-[var(--bg-card)] border-[var(--accent-color)]/50' : 'bg-[var(--bg-input)] border-[var(--border-color)]/60'}`}>
+                    <div key={idx} className={`p-2.5 rounded-xl border space-y-1 ${isUser ? 'bg-[var(--bg-card)] border-[var(--accent-color)]/50 shadow-sm' : 'bg-[var(--bg-input)] border-[var(--border-color)]/60'}`}>
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="font-semibold text-[var(--accent-color)] flex items-center gap-1.5">
-                          {isUser && <span className="px-1.5 py-0.2 rounded bg-[var(--accent-color)] text-white text-[10px] font-bold flex items-center gap-1"><User className="w-3 h-3" /> USER</span>}
-                          {!isUser && item.agent === 'COORDINATOR' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--accent-color)] text-[10px]">COORDINATOR</span>}
-                          {!isUser && item.agent === 'WORKER' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--text-primary)] text-[10px]">WORKER</span>}
-                          {!isUser && item.agent === 'SYNTHESIZER' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--accent-color)] text-[10px]">SYNTHESIZER</span>}
-                          {!isUser && item.agent === 'SYSTEM' && <span className="px-1.5 py-0.2 rounded bg-[var(--bg-card)] text-[var(--text-secondary)] text-[10px]">SYSTEM</span>}
+                        <span className="font-semibold flex items-center gap-1.5">
+                          {isUser && <span className="px-2 py-0.5 rounded bg-[var(--accent-color)] text-white text-[10px] font-bold flex items-center gap-1"><User className="w-3 h-3" /> ● You</span>}
+                          {!isUser && item.agent === 'COORDINATOR' && <span className="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-800 text-cyan-400 text-[10px] font-semibold flex items-center gap-1"><GitFork className="w-3 h-3" /> ◆ COORDINATOR</span>}
+                          {!isUser && item.agent === 'WORKER' && <span className="px-2 py-0.5 rounded bg-purple-950/50 border border-purple-800 text-purple-400 text-[10px] font-semibold flex items-center gap-1"><Bot className="w-3 h-3" /> ▸ WORKER</span>}
+                          {!isUser && item.agent === 'SYNTHESIZER' && <span className="px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-800 text-emerald-400 text-[10px] font-semibold flex items-center gap-1"><FileText className="w-3 h-3" /> ◈ SYNTHESIZER</span>}
+                          {!isUser && item.agent === 'SYSTEM' && <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400 text-[10px] flex items-center gap-1">⚙ SYSTEM</span>}
                         </span>
                         <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
                       </div>
@@ -415,7 +414,7 @@ export default function JobDetailPage() {
                 <div ref={activityEndRef} />
               </div>
 
-              {/* STEP 3: Wired Follow-up Prompt Input Box */}
+              {/* Follow-up Chat Input Box */}
               <div className="pt-3 border-t border-[var(--border-color)]/60 mt-3 shrink-0">
                 <form
                   onSubmit={handleSendFollowup}
@@ -447,14 +446,14 @@ export default function JobDetailPage() {
           </div>
         )}
 
-        {/* RIGHT PANEL (~65% width / col-span-8): The Living Report Artifact Window (Claude Artifact UI) */}
-        <div className={`${isExpanded ? 'lg:col-span-1' : 'lg:col-span-8'} claude-card rounded-2xl flex flex-col h-[calc(100vh-160px)] shadow-2xl overflow-hidden`}>
+        {/* COLUMN 3 (Right, widest, ~45% width / col-span-7): Research Detail / Rendered Markdown Living Report */}
+        <div className={`${isExpanded ? 'lg:col-span-1' : 'lg:col-span-7'} claude-card rounded-2xl flex flex-col h-[calc(100vh-160px)] shadow-2xl overflow-hidden`}>
           
           {/* Artifact Window Header */}
           <div className="h-11 px-4 border-b border-[var(--border-color)] bg-[var(--bg-sidebar)] flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2 text-xs">
-              <Code2 className="w-4 h-4 text-[var(--accent-color)]" />
-              <span className="font-semibold text-[var(--text-primary)]">Research Swarm Living Report</span>
+              <FileCode className="w-4 h-4 text-[var(--accent-color)]" />
+              <span className="font-semibold text-[var(--text-primary)]">Living Report</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)] font-mono">
                 MD
               </span>
@@ -488,14 +487,14 @@ export default function JobDetailPage() {
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="p-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-                title={isExpanded ? "Restore split view" : "Maximize Artifact view"}
+                title={isExpanded ? "Restore 3-column view" : "Maximize Living Report view"}
               >
                 {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Artifact Report Content Canvas */}
+          {/* Rendered Markdown Report Body Canvas */}
           <div className={`flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 ${reportFlash ? 'report-updated-flash' : ''}`}>
             {job.livingReport ? (
               <div className="space-y-6">
@@ -507,7 +506,7 @@ export default function JobDetailPage() {
                   <span className="font-mono text-[var(--accent-color)]">{job.livingReport.themes.length} Grounded Themes</span>
                 </div>
 
-                {/* Markdown Canvas with Uniform Accent Link Styling */}
+                {/* Rendered Markdown Canvas with Headings, Bullet Lists, and Uniform Accent Link Styling */}
                 <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
                   <ReactMarkdown
                     components={{

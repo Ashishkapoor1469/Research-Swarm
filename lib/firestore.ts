@@ -3,6 +3,12 @@ import { ResearchJob, ResearchTask, WorkerFinding, LivingReport, JobStatus, Task
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
 
+import fs from 'fs';
+import path from 'path';
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'db_store.json');
+
 class DBStore extends EventEmitter {
   private db: Firestore | null = null;
   private memoryWorkspaces: Map<string, Workspace> = new Map();
@@ -17,10 +23,69 @@ class DBStore extends EventEmitter {
         this.db = new Firestore();
         console.log('[FirestoreDB] Initialized with Google Cloud Firestore SDK');
       } else {
-        console.log('[FirestoreDB] No GCP credentials detected. Operating in high-speed In-Memory DB mode with event streaming.');
+        console.log('[FirestoreDB] Operating in high-speed persistent Local JSON / In-Memory DB mode with event streaming.');
       }
     } catch (err) {
       console.warn('[FirestoreDB] Initializing fallback in-memory store:', (err as Error).message);
+    }
+
+    this.loadLocalDiskState();
+  }
+
+  private loadLocalDiskState() {
+    try {
+      if (fs.existsSync(DATA_FILE)) {
+        const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+        const parsed = JSON.parse(raw);
+        if (parsed.workspaces) {
+          Object.values(parsed.workspaces).forEach((ws: any) => this.memoryWorkspaces.set(ws.id, ws));
+        }
+        if (parsed.jobs) {
+          Object.values(parsed.jobs).forEach((job: any) => this.memoryJobs.set(job.id, job));
+        }
+        if (parsed.tasks) {
+          Object.entries(parsed.tasks).forEach(([jobId, tasks]: [string, any]) => this.memoryTasks.set(jobId, tasks));
+        }
+        if (parsed.findings) {
+          Object.entries(parsed.findings).forEach(([jobId, findings]: [string, any]) => this.memoryFindings.set(jobId, findings));
+        }
+        console.log(`[FirestoreDB] Loaded persistent disk state: ${this.memoryWorkspaces.size} workspaces, ${this.memoryJobs.size} jobs.`);
+      }
+    } catch (e) {
+      console.error('[FirestoreDB] Failed to load local disk state:', e);
+    }
+
+    // Always guarantee at least 1 default workspace exists!
+    if (this.memoryWorkspaces.size === 0) {
+      const defaultWs: Workspace = {
+        id: 'ws-default',
+        ownerId: 'user-default',
+        name: 'General Research',
+        description: 'Default research workspace for unfiled jobs',
+        color: '#d97745',
+        fileCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      this.memoryWorkspaces.set(defaultWs.id, defaultWs);
+      this.saveLocalDiskState();
+    }
+  }
+
+  private saveLocalDiskState() {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const data = {
+        workspaces: Object.fromEntries(this.memoryWorkspaces.entries()),
+        jobs: Object.fromEntries(this.memoryJobs.entries()),
+        tasks: Object.fromEntries(this.memoryTasks.entries()),
+        findings: Object.fromEntries(this.memoryFindings.entries())
+      };
+      fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.error('[FirestoreDB] Failed to save local disk state:', e);
     }
   }
 
@@ -40,6 +105,7 @@ class DBStore extends EventEmitter {
     };
 
     this.memoryWorkspaces.set(workspace.id, workspace);
+    this.saveLocalDiskState();
 
     if (this.db) {
       try {
@@ -172,6 +238,7 @@ class DBStore extends EventEmitter {
     this.memoryJobs.set(job.id, job);
     if (!this.memoryTasks.has(job.id)) this.memoryTasks.set(job.id, []);
     if (!this.memoryFindings.has(job.id)) this.memoryFindings.set(job.id, []);
+    this.saveLocalDiskState();
 
     if (this.db) {
       try {
@@ -237,6 +304,7 @@ class DBStore extends EventEmitter {
     };
 
     this.memoryJobs.set(jobId, updatedJob);
+    this.saveLocalDiskState();
 
     if (this.db) {
       try {
@@ -272,6 +340,7 @@ class DBStore extends EventEmitter {
     this.memoryJobs.delete(jobId);
     this.memoryTasks.delete(jobId);
     this.memoryFindings.delete(jobId);
+    this.saveLocalDiskState();
 
     if (this.db) {
       try {
@@ -306,6 +375,7 @@ class DBStore extends EventEmitter {
     const tasks = this.memoryTasks.get(task.jobId) || [];
     tasks.push(task);
     this.memoryTasks.set(task.jobId, tasks);
+    this.saveLocalDiskState();
 
     if (this.db) {
       try {
@@ -349,6 +419,8 @@ class DBStore extends EventEmitter {
     if (timing?.durationMs) task.durationMs = timing.durationMs;
     if (error) task.error = error;
 
+    this.saveLocalDiskState();
+
     if (this.db) {
       try {
         await this.db.collection('jobs').doc(jobId).collection('tasks').doc(taskId).update({
@@ -374,6 +446,7 @@ class DBStore extends EventEmitter {
     const findings = this.memoryFindings.get(finding.jobId) || [];
     findings.push(finding);
     this.memoryFindings.set(finding.jobId, findings);
+    this.saveLocalDiskState();
 
     if (this.db) {
       try {

@@ -1,0 +1,1019 @@
+{
+  "workspaces": {
+    "ws-default": {
+      "id": "ws-default",
+      "ownerId": "user-default",
+      "name": "General Research",
+      "description": "Default research workspace for unfiled jobs",
+      "color": "#d97745",
+      "fileCount": 0,
+      "createdAt": "2026-08-28T07:26:12.937Z",
+      "updatedAt": "2026-08-28T07:26:12.939Z"
+    },
+    "ws-0532d9ac": {
+      "id": "ws-0532d9ac",
+      "ownerId": "user-test-swarm",
+      "name": "Swarm Engine Test Workspace",
+      "description": "Throwaway workspace for end-to-end swarm execution tests",
+      "color": "#d97745",
+      "fileCount": 2,
+      "createdAt": "2026-08-28T07:26:14.572Z",
+      "updatedAt": "2026-08-28T07:26:15.604Z"
+    }
+  },
+  "jobs": {
+    "job-test-c963bc23": {
+      "id": "job-test-c963bc23",
+      "workspaceId": "ws-0532d9ac",
+      "fileName": "EU AI Act Startup Analysis",
+      "question": "How is the EU AI Act going to affect small AI startups?",
+      "depth": "standard",
+      "status": "completed",
+      "createdAt": "2026-08-28T07:26:14.580Z",
+      "updatedAt": "2026-08-28T07:26:15.548Z",
+      "tasksTotal": 6,
+      "tasksCompleted": 3,
+      "maxTasks": 20,
+      "maxDurationMinutes": 90,
+      "replanningCount": 0,
+      "activityLog": [
+        {
+          "timestamp": "2026-08-28T07:26:14.580Z",
+          "agent": "SYSTEM",
+          "message": "Test job launched."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:14.700Z",
+          "agent": "COORDINATOR",
+          "message": "Decomposing main research prompt into parallel sub-questions...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:14.708Z",
+          "agent": "COORDINATOR",
+          "message": "Generated 6 sub-questions with web search hints. Launching worker swarm...",
+          "metadata": {
+            "subquestions": [
+              {
+                "subquestion": "What are the regulatory compliance tier requirements under the EU AI Act for small AI startups?",
+                "searchHint": "EU AI Act risk classification small business exemptions"
+              },
+              {
+                "subquestion": "What financial costs and legal overhead will early-stage AI startups face for compliance?",
+                "searchHint": "EU AI Act compliance cost estimate SME startup"
+              },
+              {
+                "subquestion": "How does the EU AI Act impact open-source AI models and foundation model developers?",
+                "searchHint": "EU AI Act open source general purpose AI GPAI rules"
+              },
+              {
+                "subquestion": "What regulatory sandboxes and SME support provisions exist in the EU AI Act?",
+                "searchHint": "EU AI Act regulatory sandboxes article 53 SME support"
+              },
+              {
+                "subquestion": "How are venture capital firms and investors adjusting funding strategies for EU AI startups?",
+                "searchHint": "EU AI Act venture capital investment impact European AI startups"
+              },
+              {
+                "subquestion": "What is the timeline for enforcement and grace periods for AI Act compliance?",
+                "searchHint": "EU AI Act implementation timeline enforcement dates 2025 2026"
+              }
+            ]
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.012Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-s3ao7] active: Searching & reading web sources for \"What regulatory sandboxes and SME support provisions exist i...\"",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-4",
+            "workerId": "worker-s3ao7",
+            "subquestion": "What regulatory sandboxes and SME support provisions exist in the EU AI Act?"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.021Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.025Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-s3ao7] finished in 6ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-4",
+            "workerId": "worker-s3ao7",
+            "durationMs": 6,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.032Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v1 updated. 5 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.090Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-80qad] active: Searching & reading web sources for \"What are the regulatory compliance tier requirements under t...\"",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-1",
+            "workerId": "worker-80qad",
+            "subquestion": "What are the regulatory compliance tier requirements under the EU AI Act for small AI startups?"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.098Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.102Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-80qad] finished in 5ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-1",
+            "workerId": "worker-80qad",
+            "durationMs": 5,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.107Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v2 updated. 4 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.276Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-660rw] active: Searching & reading web sources for \"What is the timeline for enforcement and grace periods for A...\"",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-6",
+            "workerId": "worker-660rw",
+            "subquestion": "What is the timeline for enforcement and grace periods for AI Act compliance?"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.282Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.286Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-660rw] finished in 4ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-6",
+            "workerId": "worker-660rw",
+            "durationMs": 4,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.292Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v3 updated. 3 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.309Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-f09d7] active: Searching & reading web sources for \"How are venture capital firms and investors adjusting fundin...\"",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-5",
+            "workerId": "worker-f09d7",
+            "subquestion": "How are venture capital firms and investors adjusting funding strategies for EU AI startups?"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.316Z",
+          "agent": "COORDINATOR",
+          "message": "Evaluating intermediate findings to check if dynamic follow-up research is required..."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.321Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-f09d7] finished in 7ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-5",
+            "workerId": "worker-f09d7",
+            "durationMs": 7,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.325Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.330Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v4 updated. 2 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.417Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-yoozz] active: Searching & reading web sources for \"What financial costs and legal overhead will early-stage AI ...\"",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-2",
+            "workerId": "worker-yoozz",
+            "subquestion": "What financial costs and legal overhead will early-stage AI startups face for compliance?"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.427Z",
+          "agent": "COORDINATOR",
+          "message": "Evaluating intermediate findings to check if dynamic follow-up research is required..."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.432Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-yoozz] finished in 6ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-2",
+            "workerId": "worker-yoozz",
+            "durationMs": 6,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.435Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.442Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v5 updated. 1 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.511Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-dx6u7] active: Searching & reading web sources for \"How does the EU AI Act impact open-source AI models and foun...\"",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-3",
+            "workerId": "worker-dx6u7",
+            "subquestion": "How does the EU AI Act impact open-source AI models and foundation model developers?"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.524Z",
+          "agent": "COORDINATOR",
+          "message": "Evaluating intermediate findings to check if dynamic follow-up research is required..."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.530Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-dx6u7] finished in 10ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-test-c963bc23",
+            "taskId": "task-job-test-3",
+            "workerId": "worker-dx6u7",
+            "durationMs": 10,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.534Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-test-c963bc23"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.548Z",
+          "agent": "SYNTHESIZER",
+          "message": "🎉 Final Synthesis Complete! Published Report v6 with 6 findings, 6 themes, and full inline citations."
+        }
+      ],
+      "livingReport": {
+        "version": 6,
+        "executiveSummary": "Research Swarm has completed an autonomous multi-agent analysis on: **\"How is the EU AI Act going to affect small AI startups?\"**.\n\nSynthesizing 6 grounded worker findings, key takeaways demonstrate rapid growth, structural adjustment, and strategic alignment across global markets.",
+        "themes": [
+          {
+            "title": "1. What regulatory sandboxes and SME support provisions exist in the EU AI Act?",
+            "content": "Research synthesis for \"What regulatory sandboxes and SME support provisions exist in the EU AI Act?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What regulatory sandboxes and SME suppor.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What regulatory sandboxes and ",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "2. What are the regulatory compliance tier requirements under the EU AI Act for small AI startups?",
+            "content": "The EU AI Act categorizes AI systems into four risk tiers: Unacceptable Risk, High Risk, Specific Transparency Risk, and Minimal/No Risk. Most small startups building content tools fall into minimal risk.\n\n**Key Evidence & Factual Bullet Points:**\n- High-risk AI systems require mandatory fundamental rights impact assessments.\n- Fines for non-compliance can reach up to €35M or 7% of global turnover.\n- SMEs receive tailored guidelines and reduced penalty caps under Article 99.\n",
+            "citationSources": [
+              {
+                "title": "Official EU AI Act Text - Risk Classifications (Article 6)",
+                "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52021PC0206",
+                "snippet": "High-risk AI requirements for SMEs."
+              }
+            ]
+          },
+          {
+            "title": "3. What is the timeline for enforcement and grace periods for AI Act compliance?",
+            "content": "Research synthesis for \"What is the timeline for enforcement and grace periods for AI Act compliance?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What is the timeline for enforcement and.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What is the timeline for enfor",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "4. How are venture capital firms and investors adjusting funding strategies for EU AI startups?",
+            "content": "Research synthesis for \"How are venture capital firms and investors adjusting funding strategies for EU AI startups?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding How are venture capital firms and invest.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - How are venture capital firms ",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "5. What financial costs and legal overhead will early-stage AI startups face for compliance?",
+            "content": "Research synthesis for \"What financial costs and legal overhead will early-stage AI startups face for compliance?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What financial costs and legal overhead .\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What financial costs and legal",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "6. How does the EU AI Act impact open-source AI models and foundation model developers?",
+            "content": "Research synthesis for \"How does the EU AI Act impact open-source AI models and foundation model developers?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding How does the EU AI Act impact open-sourc.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - How does the EU AI Act impact ",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          }
+        ],
+        "stillInvestigating": [],
+        "fullMarkdown": "# Research Swarm Report: How is the EU AI Act going to affect small AI startups?\n\n> **Status**: Final Synthesis Complete\n> **Generated by**: Gemini 2.5 Flash Autonomous Agent Fleet\n\n## Executive Summary\nResearch Swarm has completed an autonomous multi-agent analysis on: **\"How is the EU AI Act going to affect small AI startups?\"**.\n\nSynthesizing 6 grounded worker findings, key takeaways demonstrate rapid growth, structural adjustment, and strategic alignment across global markets.\n\n## Comprehensive Findings by Theme\n\n### 1. What regulatory sandboxes and SME support provisions exist in the EU AI Act?\nResearch synthesis for \"What regulatory sandboxes and SME support provisions exist in the EU AI Act?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What regulatory sandboxes and SME suppor.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What regulatory sandboxes and ](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 2. What are the regulatory compliance tier requirements under the EU AI Act for small AI startups?\nThe EU AI Act categorizes AI systems into four risk tiers: Unacceptable Risk, High Risk, Specific Transparency Risk, and Minimal/No Risk. Most small startups building content tools fall into minimal risk.\n\n**Key Evidence & Factual Bullet Points:**\n- High-risk AI systems require mandatory fundamental rights impact assessments.\n- Fines for non-compliance can reach up to €35M or 7% of global turnover.\n- SMEs receive tailored guidelines and reduced penalty caps under Article 99.\n\n\n**Sources & References:**\n- [Official EU AI Act Text - Risk Classifications (Article 6)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52021PC0206)\n\n### 3. What is the timeline for enforcement and grace periods for AI Act compliance?\nResearch synthesis for \"What is the timeline for enforcement and grace periods for AI Act compliance?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What is the timeline for enforcement and.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What is the timeline for enfor](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 4. How are venture capital firms and investors adjusting funding strategies for EU AI startups?\nResearch synthesis for \"How are venture capital firms and investors adjusting funding strategies for EU AI startups?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding How are venture capital firms and invest.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - How are venture capital firms ](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 5. What financial costs and legal overhead will early-stage AI startups face for compliance?\nResearch synthesis for \"What financial costs and legal overhead will early-stage AI startups face for compliance?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What financial costs and legal overhead .\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What financial costs and legal](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 6. How does the EU AI Act impact open-source AI models and foundation model developers?\nResearch synthesis for \"How does the EU AI Act impact open-source AI models and foundation model developers?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding How does the EU AI Act impact open-sourc.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - How does the EU AI Act impact ](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n---\n*Report dynamically compiled and updated by Research Swarm Synthesizer Agent.*",
+        "updatedAt": "2026-08-28T07:26:15.538Z"
+      }
+    },
+    "job-resilience-d4a4fa79": {
+      "id": "job-resilience-d4a4fa79",
+      "workspaceId": "ws-0532d9ac",
+      "fileName": "Quantum Security Risks",
+      "question": "What are the quantum security risks for enterprise SaaS in 2026?",
+      "depth": "quick",
+      "status": "completed",
+      "createdAt": "2026-08-28T07:26:15.601Z",
+      "updatedAt": "2026-08-28T07:26:16.615Z",
+      "tasksTotal": 4,
+      "tasksCompleted": 2,
+      "maxTasks": 10,
+      "maxDurationMinutes": 30,
+      "replanningCount": 0,
+      "activityLog": [
+        {
+          "timestamp": "2026-08-28T07:26:15.601Z",
+          "agent": "SYSTEM",
+          "message": "Resilience test job launched."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.711Z",
+          "agent": "COORDINATOR",
+          "message": "Decomposing main research prompt into parallel sub-questions...",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:15.715Z",
+          "agent": "COORDINATOR",
+          "message": "Generated 4 sub-questions with web search hints. Launching worker swarm...",
+          "metadata": {
+            "subquestions": [
+              {
+                "subquestion": "What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??",
+                "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? core drivers statistics market size"
+              },
+              {
+                "subquestion": "What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??",
+                "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? regulation policy framework legal"
+              },
+              {
+                "subquestion": "What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??",
+                "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? market risk challenge critique"
+              },
+              {
+                "subquestion": "What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??",
+                "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? future outlook 2026 trends forecast"
+              }
+            ]
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.171Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-0fhcq] active: Searching & reading web sources for \"What emerging trends and future developments will shape What...\"",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-4",
+            "workerId": "worker-0fhcq",
+            "subquestion": "What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.185Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.193Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-0fhcq] finished in 10ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-4",
+            "workerId": "worker-0fhcq",
+            "durationMs": 10,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.200Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v1 updated. 3 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.307Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-h8ipf] active: Searching & reading web sources for \"What are the core technical & economic drivers behind What a...\"",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-1",
+            "workerId": "worker-h8ipf",
+            "subquestion": "What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.328Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.334Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-h8ipf] finished in 5ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-1",
+            "workerId": "worker-h8ipf",
+            "durationMs": 5,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.342Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v2 updated. 2 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.524Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-gs1pv] active: Searching & reading web sources for \"What regulatory frameworks and policy considerations govern ...\"",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-2",
+            "workerId": "worker-gs1pv",
+            "subquestion": "What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.533Z",
+          "agent": "COORDINATOR",
+          "message": "Evaluating intermediate findings to check if dynamic follow-up research is required..."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.538Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-gs1pv] finished in 5ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-2",
+            "workerId": "worker-gs1pv",
+            "durationMs": 5,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.541Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.546Z",
+          "agent": "SYNTHESIZER",
+          "message": "📝 Living Report v3 updated. 1 open sub-questions still being researched by worker fleet."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.587Z",
+          "agent": "WORKER",
+          "message": "Worker [worker-s6cws] active: Searching & reading web sources for \"What are key competitive challenges and market risks regardi...\"",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-3",
+            "workerId": "worker-s6cws",
+            "subquestion": "What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.597Z",
+          "agent": "COORDINATOR",
+          "message": "Evaluating intermediate findings to check if dynamic follow-up research is required..."
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.603Z",
+          "agent": "WORKER",
+          "message": "✅ Worker [worker-s6cws] finished in 7ms. Extracted 3 facts & 1 sources.",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79",
+            "taskId": "task-job-resi-3",
+            "workerId": "worker-s6cws",
+            "durationMs": 7,
+            "sourcesCount": 1
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.606Z",
+          "agent": "SYNTHESIZER",
+          "message": "Re-clustering findings into themes and updating living Markdown report with citations...",
+          "metadata": {
+            "traceId": "job-resilience-d4a4fa79"
+          }
+        },
+        {
+          "timestamp": "2026-08-28T07:26:16.615Z",
+          "agent": "SYNTHESIZER",
+          "message": "🎉 Final Synthesis Complete! Published Report v4 with 4 findings, 4 themes, and full inline citations."
+        }
+      ],
+      "livingReport": {
+        "version": 4,
+        "executiveSummary": "Research Swarm has completed an autonomous multi-agent analysis on: **\"What are the quantum security risks for enterprise SaaS in 2026?\"**.\n\nSynthesizing 4 grounded worker findings, key takeaways demonstrate rapid growth, structural adjustment, and strategic alignment across global markets.",
+        "themes": [
+          {
+            "title": "1. What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??",
+            "content": "Research synthesis for \"What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What emerging trends and future developm.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What emerging trends and futur",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "2. What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??",
+            "content": "Research synthesis for \"What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What are the core technical & economic d.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What are the core technical & ",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "3. What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??",
+            "content": "Research synthesis for \"What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What regulatory frameworks and policy co.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What regulatory frameworks and",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          },
+          {
+            "title": "4. What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??",
+            "content": "Research synthesis for \"What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What are key competitive challenges and .\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n",
+            "citationSources": [
+              {
+                "title": "Global Market Insight Report - What are key competitive chall",
+                "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+                "snippet": "Global benchmarking across major tech and industrial hubs."
+              }
+            ]
+          }
+        ],
+        "stillInvestigating": [],
+        "fullMarkdown": "# Research Swarm Report: What are the quantum security risks for enterprise SaaS in 2026?\n\n> **Status**: Final Synthesis Complete\n> **Generated by**: Gemini 2.5 Flash Autonomous Agent Fleet\n\n## Executive Summary\nResearch Swarm has completed an autonomous multi-agent analysis on: **\"What are the quantum security risks for enterprise SaaS in 2026?\"**.\n\nSynthesizing 4 grounded worker findings, key takeaways demonstrate rapid growth, structural adjustment, and strategic alignment across global markets.\n\n## Comprehensive Findings by Theme\n\n### 1. What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??\nResearch synthesis for \"What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What emerging trends and future developm.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What emerging trends and futur](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 2. What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??\nResearch synthesis for \"What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What are the core technical & economic d.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What are the core technical & ](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 3. What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??\nResearch synthesis for \"What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What regulatory frameworks and policy co.\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What regulatory frameworks and](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n### 4. What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??\nResearch synthesis for \"What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.\n\n**Key Evidence & Factual Bullet Points:**\n- Empirical data shows rapid growth in adoption regarding What are key competitive challenges and .\n- Strategic investments have accelerated technical integration by 150% year-over-year.\n- Global regulatory standards are converging to establish unified benchmarks.\n\n\n**Sources & References:**\n- [Global Market Insight Report - What are key competitive chall](https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026)\n\n---\n*Report dynamically compiled and updated by Research Swarm Synthesizer Agent.*",
+        "updatedAt": "2026-08-28T07:26:16.610Z"
+      }
+    }
+  },
+  "tasks": {
+    "job-test-c963bc23": [
+      {
+        "id": "task-job-test-1",
+        "jobId": "job-test-c963bc23",
+        "subquestion": "What are the regulatory compliance tier requirements under the EU AI Act for small AI startups?",
+        "searchHint": "EU AI Act risk classification small business exemptions",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:14.710Z",
+        "updatedAt": "2026-08-28T07:26:15.095Z",
+        "startedAt": "2026-08-28T07:26:15.088Z",
+        "completedAt": "2026-08-28T07:26:15.093Z",
+        "durationMs": 5
+      },
+      {
+        "id": "task-job-test-2",
+        "jobId": "job-test-c963bc23",
+        "subquestion": "What financial costs and legal overhead will early-stage AI startups face for compliance?",
+        "searchHint": "EU AI Act compliance cost estimate SME startup",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:14.715Z",
+        "updatedAt": "2026-08-28T07:26:15.423Z",
+        "startedAt": "2026-08-28T07:26:15.414Z",
+        "completedAt": "2026-08-28T07:26:15.420Z",
+        "durationMs": 6
+      },
+      {
+        "id": "task-job-test-3",
+        "jobId": "job-test-c963bc23",
+        "subquestion": "How does the EU AI Act impact open-source AI models and foundation model developers?",
+        "searchHint": "EU AI Act open source general purpose AI GPAI rules",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:14.718Z",
+        "updatedAt": "2026-08-28T07:26:15.521Z",
+        "startedAt": "2026-08-28T07:26:15.507Z",
+        "completedAt": "2026-08-28T07:26:15.517Z",
+        "durationMs": 10
+      },
+      {
+        "id": "task-job-test-4",
+        "jobId": "job-test-c963bc23",
+        "subquestion": "What regulatory sandboxes and SME support provisions exist in the EU AI Act?",
+        "searchHint": "EU AI Act regulatory sandboxes article 53 SME support",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:14.721Z",
+        "updatedAt": "2026-08-28T07:26:15.019Z",
+        "startedAt": "2026-08-28T07:26:15.010Z",
+        "completedAt": "2026-08-28T07:26:15.016Z",
+        "durationMs": 6
+      },
+      {
+        "id": "task-job-test-5",
+        "jobId": "job-test-c963bc23",
+        "subquestion": "How are venture capital firms and investors adjusting funding strategies for EU AI startups?",
+        "searchHint": "EU AI Act venture capital investment impact European AI startups",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:14.724Z",
+        "updatedAt": "2026-08-28T07:26:15.315Z",
+        "startedAt": "2026-08-28T07:26:15.305Z",
+        "completedAt": "2026-08-28T07:26:15.312Z",
+        "durationMs": 7
+      },
+      {
+        "id": "task-job-test-6",
+        "jobId": "job-test-c963bc23",
+        "subquestion": "What is the timeline for enforcement and grace periods for AI Act compliance?",
+        "searchHint": "EU AI Act implementation timeline enforcement dates 2025 2026",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:14.731Z",
+        "updatedAt": "2026-08-28T07:26:15.280Z",
+        "startedAt": "2026-08-28T07:26:15.274Z",
+        "completedAt": "2026-08-28T07:26:15.278Z",
+        "durationMs": 4
+      }
+    ],
+    "job-resilience-d4a4fa79": [
+      {
+        "id": "task-job-resi-1",
+        "jobId": "job-resilience-d4a4fa79",
+        "subquestion": "What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??",
+        "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? core drivers statistics market size",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:15.721Z",
+        "updatedAt": "2026-08-28T07:26:16.316Z",
+        "startedAt": "2026-08-28T07:26:16.304Z",
+        "completedAt": "2026-08-28T07:26:16.309Z",
+        "durationMs": 5
+      },
+      {
+        "id": "task-job-resi-2",
+        "jobId": "job-resilience-d4a4fa79",
+        "subquestion": "What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??",
+        "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? regulation policy framework legal",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:15.724Z",
+        "updatedAt": "2026-08-28T07:26:16.531Z",
+        "startedAt": "2026-08-28T07:26:16.522Z",
+        "completedAt": "2026-08-28T07:26:16.527Z",
+        "durationMs": 5
+      },
+      {
+        "id": "task-job-resi-3",
+        "jobId": "job-resilience-d4a4fa79",
+        "subquestion": "What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??",
+        "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? market risk challenge critique",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:15.729Z",
+        "updatedAt": "2026-08-28T07:26:16.594Z",
+        "startedAt": "2026-08-28T07:26:16.584Z",
+        "completedAt": "2026-08-28T07:26:16.591Z",
+        "durationMs": 7
+      },
+      {
+        "id": "task-job-resi-4",
+        "jobId": "job-resilience-d4a4fa79",
+        "subquestion": "What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??",
+        "searchHint": "What are the quantum security risks for enterprise SaaS in 2026? future outlook 2026 trends forecast",
+        "status": "done",
+        "attempts": 0,
+        "maxAttempts": 3,
+        "createdAt": "2026-08-28T07:26:15.731Z",
+        "updatedAt": "2026-08-28T07:26:16.179Z",
+        "startedAt": "2026-08-28T07:26:16.165Z",
+        "completedAt": "2026-08-28T07:26:16.175Z",
+        "durationMs": 10
+      }
+    ]
+  },
+  "findings": {
+    "job-test-c963bc23": [
+      {
+        "id": "finding-b908898d",
+        "jobId": "job-test-c963bc23",
+        "taskId": "task-job-test-4",
+        "subquestion": "What regulatory sandboxes and SME support provisions exist in the EU AI Act?",
+        "summary": "Research synthesis for \"What regulatory sandboxes and SME support provisions exist in the EU AI Act?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What regulatory sandboxes and SME suppor.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What regulatory sandboxes and ",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:15.016Z"
+      },
+      {
+        "id": "finding-5bdc128f",
+        "jobId": "job-test-c963bc23",
+        "taskId": "task-job-test-1",
+        "subquestion": "What are the regulatory compliance tier requirements under the EU AI Act for small AI startups?",
+        "summary": "The EU AI Act categorizes AI systems into four risk tiers: Unacceptable Risk, High Risk, Specific Transparency Risk, and Minimal/No Risk. Most small startups building content tools fall into minimal risk.",
+        "keyFacts": [
+          "High-risk AI systems require mandatory fundamental rights impact assessments.",
+          "Fines for non-compliance can reach up to €35M or 7% of global turnover.",
+          "SMEs receive tailored guidelines and reduced penalty caps under Article 99."
+        ],
+        "sources": [
+          {
+            "title": "Official EU AI Act Text - Risk Classifications (Article 6)",
+            "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52021PC0206",
+            "snippet": "High-risk AI requirements for SMEs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:15.093Z"
+      },
+      {
+        "id": "finding-108c433e",
+        "jobId": "job-test-c963bc23",
+        "taskId": "task-job-test-6",
+        "subquestion": "What is the timeline for enforcement and grace periods for AI Act compliance?",
+        "summary": "Research synthesis for \"What is the timeline for enforcement and grace periods for AI Act compliance?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What is the timeline for enforcement and.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What is the timeline for enfor",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:15.278Z"
+      },
+      {
+        "id": "finding-b2f9ac2c",
+        "jobId": "job-test-c963bc23",
+        "taskId": "task-job-test-5",
+        "subquestion": "How are venture capital firms and investors adjusting funding strategies for EU AI startups?",
+        "summary": "Research synthesis for \"How are venture capital firms and investors adjusting funding strategies for EU AI startups?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding How are venture capital firms and invest.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - How are venture capital firms ",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:15.312Z"
+      },
+      {
+        "id": "finding-d2ab5a7e",
+        "jobId": "job-test-c963bc23",
+        "taskId": "task-job-test-2",
+        "subquestion": "What financial costs and legal overhead will early-stage AI startups face for compliance?",
+        "summary": "Research synthesis for \"What financial costs and legal overhead will early-stage AI startups face for compliance?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What financial costs and legal overhead .",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What financial costs and legal",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:15.420Z"
+      },
+      {
+        "id": "finding-d1e9ef91",
+        "jobId": "job-test-c963bc23",
+        "taskId": "task-job-test-3",
+        "subquestion": "How does the EU AI Act impact open-source AI models and foundation model developers?",
+        "summary": "Research synthesis for \"How does the EU AI Act impact open-source AI models and foundation model developers?\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding How does the EU AI Act impact open-sourc.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - How does the EU AI Act impact ",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:15.517Z"
+      }
+    ],
+    "job-resilience-d4a4fa79": [
+      {
+        "id": "finding-62440cc3",
+        "jobId": "job-resilience-d4a4fa79",
+        "taskId": "task-job-resi-4",
+        "subquestion": "What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??",
+        "summary": "Research synthesis for \"What emerging trends and future developments will shape What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What emerging trends and future developm.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What emerging trends and futur",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:16.175Z"
+      },
+      {
+        "id": "finding-e58f236b",
+        "jobId": "job-resilience-d4a4fa79",
+        "taskId": "task-job-resi-1",
+        "subquestion": "What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??",
+        "summary": "Research synthesis for \"What are the core technical & economic drivers behind What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What are the core technical & economic d.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What are the core technical & ",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:16.309Z"
+      },
+      {
+        "id": "finding-0183c32b",
+        "jobId": "job-resilience-d4a4fa79",
+        "taskId": "task-job-resi-2",
+        "subquestion": "What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??",
+        "summary": "Research synthesis for \"What regulatory frameworks and policy considerations govern What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What regulatory frameworks and policy co.",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What regulatory frameworks and",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:16.527Z"
+      },
+      {
+        "id": "finding-b7df8476",
+        "jobId": "job-resilience-d4a4fa79",
+        "taskId": "task-job-resi-3",
+        "subquestion": "What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??",
+        "summary": "Research synthesis for \"What are key competitive challenges and market risks regarding What are the quantum security risks for enterprise SaaS in 2026??\": Factual industry evidence indicates structural acceleration. Key market participants are establishing specialized frameworks while leveraging automated auditing pipelines to maintain growth.",
+        "keyFacts": [
+          "Empirical data shows rapid growth in adoption regarding What are key competitive challenges and .",
+          "Strategic investments have accelerated technical integration by 150% year-over-year.",
+          "Global regulatory standards are converging to establish unified benchmarks."
+        ],
+        "sources": [
+          {
+            "title": "Global Market Insight Report - What are key competitive chall",
+            "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/state-of-ai-regulation-2026",
+            "snippet": "Global benchmarking across major tech and industrial hubs."
+          }
+        ],
+        "confidence": "high",
+        "createdAt": "2026-08-28T07:26:16.591Z"
+      }
+    ]
+  }
+}
