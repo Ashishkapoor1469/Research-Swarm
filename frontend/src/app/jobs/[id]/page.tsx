@@ -8,8 +8,10 @@ import {
   ArrowLeft, CheckCircle2, Clock, AlertCircle, RefreshCw, 
   Sparkles, Activity, Cpu, Copy, Maximize2, Minimize2, 
   Check, Send, Code2, Search, CheckCircle, Hourglass, ShieldCheck,
-  ChevronDown, ChevronUp, User, Cog, GitFork, Bot, FileText, FileCode, Layers, Info
+  ChevronDown, ChevronUp, User, Cog, GitFork, Bot, FileText, FileCode,
+  Download, Sliders, FileDown
 } from 'lucide-react';
+import { JobDepth } from '@/lib/types';
 
 interface ActivityLogItem {
   timestamp: string;
@@ -55,7 +57,7 @@ interface LivingReport {
 interface JobData {
   id: string;
   question: string;
-  depth: string;
+  depth: JobDepth;
   status: 'planning' | 'in_progress' | 'synthesizing' | 'completed' | 'failed' | 'budget-exhausted-synthesizing';
   createdAt: string;
   updatedAt: string;
@@ -87,6 +89,10 @@ export default function JobDetailPage() {
   const [followupText, setFollowupText] = useState('');
   const [isSubmittingFollowup, setIsSubmittingFollowup] = useState(false);
   
+  // Mode Switcher State inside Chat Input
+  const [selectedDepth, setSelectedDepth] = useState<JobDepth>('standard');
+  const [showModeDropdown, setShowModeDropdown] = useState(false);
+
   const prevVersionRef = useRef<number>(0);
   const activityEndRef = useRef<HTMLDivElement>(null);
 
@@ -113,6 +119,9 @@ export default function JobDetailPage() {
       setJob(data.job);
       setTasks(data.tasks || []);
       setFindings(data.findings || []);
+      if (data.job.depth) {
+        setSelectedDepth(data.job.depth);
+      }
 
       if (data.job.livingReport && data.job.livingReport.version > prevVersionRef.current) {
         if (prevVersionRef.current > 0) {
@@ -164,6 +173,18 @@ export default function JobDetailPage() {
     }
   };
 
+  const downloadReportFile = () => {
+    if (job?.livingReport?.fullMarkdown) {
+      const blob = new Blob([job.livingReport.fullMarkdown], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Research_Swarm_Report_${job.id.slice(0, 8)}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
   async function handleSendFollowup(e: React.FormEvent) {
     e.preventDefault();
     if (!followupText.trim() || isSubmittingFollowup || !job) return;
@@ -176,7 +197,7 @@ export default function JobDetailPage() {
       const res = await fetch(`/api/jobs/${job.id}/followup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg })
+        body: JSON.stringify({ message: msg, depth: selectedDepth })
       });
 
       if (!res.ok) {
@@ -212,13 +233,13 @@ export default function JobDetailPage() {
     );
   }
 
-  // Single Source of Truth for task counts (Derived directly from live tasks array)
+  // Single Source of Truth for task counts
   const tasksTotal = tasks.length;
   const tasksCompleted = tasks.filter(t => t.status === 'done').length;
   const progressPercent = tasksTotal > 0 ? Math.round((tasksCompleted / tasksTotal) * 100) : 0;
   const isComplete = job.status === 'completed';
 
-  // STEP 2 & USER DIRECTIVE: Derive dynamic cycle status text & role-matching accent colors from latest activity log
+  // Derive dynamic cycle status text & role-matching accent colors
   const lastLog = job.activityLog && job.activityLog.length > 0 ? job.activityLog[job.activityLog.length - 1] : null;
   
   let statusText = "Initializing Swarm...";
@@ -263,7 +284,7 @@ export default function JobDetailPage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Top Header Bar with Mode Badge */}
+      {/* Top Header Bar with Mode Selector Badge */}
       <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-3">
         <div className="flex items-center gap-3">
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline font-medium">
@@ -271,13 +292,13 @@ export default function JobDetailPage() {
           </Link>
           <span className="text-[var(--text-secondary)] text-xs">•</span>
           
-          {/* Depth / Mode Badge */}
+          {/* Depth / Mode Pill */}
           <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border ${
-            job.depth === 'quick' ? 'bg-cyan-950/40 text-cyan-400 border-cyan-800' :
-            job.depth === 'deep' ? 'bg-amber-950/40 text-amber-400 border-amber-800' :
+            selectedDepth === 'quick' ? 'bg-cyan-950/40 text-cyan-400 border-cyan-800' :
+            selectedDepth === 'deep' ? 'bg-amber-950/40 text-amber-400 border-amber-800' :
             'bg-purple-950/40 text-purple-400 border-purple-800'
           }`}>
-            {job.depth === 'quick' ? '⚡ Quick (4 Tasks)' : job.depth === 'deep' ? '🔬 Deep Research (25 Tasks)' : '🎯 Standard (6 Tasks)'}
+            {selectedDepth === 'quick' ? '⚡ Quick (4 Tasks)' : selectedDepth === 'deep' ? '🔬 Deep Research (25 Tasks)' : '🎯 Standard (6 Tasks)'}
           </span>
 
           <h1 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-md">
@@ -288,7 +309,7 @@ export default function JobDetailPage() {
         {/* Grounded Audit Pass Badge & Status Pill */}
         <div className="flex items-center gap-3">
           <span className="px-2.5 py-1 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[11px] text-emerald-400 font-mono flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" /> Grounded Grounding Audit Pass
+            <ShieldCheck className="w-3.5 h-3.5" /> Grounded Audit Pass
           </span>
 
           {isComplete ? (
@@ -303,7 +324,7 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      {/* 3-COLUMN CLAUDE ARTIFACT LAYOUT */}
+      {/* 3-COLUMN RESTRUCTURED LAYOUT */}
       <div className={`grid grid-cols-1 ${isExpanded ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-6 items-start`}>
         
         {/* COLUMN 2 (Middle, ~35% width / col-span-5): Clean Chat Thread Pane */}
@@ -481,20 +502,63 @@ export default function JobDetailPage() {
               <div ref={activityEndRef} />
             </div>
 
-            {/* Pinned Follow-up Chat Input Box at Bottom */}
+            {/* Pinned Follow-up Chat Input Box with Mode Switcher Icon */}
             <div className="pt-3 border-t border-[var(--border-color)]/60 mt-3 shrink-0">
               <form
                 onSubmit={handleSendFollowup}
-                className="flex items-center gap-2 bg-[var(--bg-input)] p-1.5 rounded-xl border border-[var(--border-color)]"
+                className="flex items-center gap-2 bg-[var(--bg-input)] p-1.5 rounded-xl border border-[var(--border-color)] relative"
               >
+                {/* Mode Switcher Dropdown Button */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowModeDropdown(!showModeDropdown)}
+                    className="px-2 py-1.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-color)] hover:border-[var(--accent-color)] transition-colors flex items-center gap-1.5 font-mono text-[10px] font-bold cursor-pointer"
+                    title="Change Research Mode for follow-up prompt"
+                  >
+                    <Sliders className="w-3 h-3" />
+                    <span className="capitalize">{selectedDepth}</span>
+                  </button>
+
+                  {showModeDropdown && (
+                    <div className="absolute bottom-11 left-0 w-48 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl py-1 z-50">
+                      <div className="px-3 py-1.5 text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                        Research Mode
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedDepth('quick'); setShowModeDropdown(false); }}
+                        className="w-full px-3 py-2 text-xs flex items-center justify-between text-left hover:bg-[var(--bg-input)] text-cyan-400 font-medium transition-colors"
+                      >
+                        <span>⚡ Quick (4 Tasks)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedDepth('standard'); setShowModeDropdown(false); }}
+                        className="w-full px-3 py-2 text-xs flex items-center justify-between text-left hover:bg-[var(--bg-input)] text-purple-400 font-medium transition-colors"
+                      >
+                        <span>🎯 Standard (6 Tasks)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedDepth('deep'); setShowModeDropdown(false); }}
+                        className="w-full px-3 py-2 text-xs flex items-center justify-between text-left hover:bg-[var(--bg-input)] text-amber-400 font-medium transition-colors"
+                      >
+                        <span>🔬 Deep (25 Tasks)</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <input
                   type="text"
                   value={followupText}
                   onChange={(e) => setFollowupText(e.target.value)}
                   disabled={isSubmittingFollowup}
-                  placeholder={isSubmittingFollowup ? "Coordinator evaluating follow-up request..." : "Ask follow-up or redirect research..."}
+                  placeholder={isSubmittingFollowup ? "Coordinator evaluating request..." : "Ask follow-up or redirect research..."}
                   className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none px-2 placeholder:text-[var(--text-secondary)]/60 disabled:opacity-50"
                 />
+                
                 <button
                   type="submit"
                   disabled={isSubmittingFollowup || !followupText.trim()}
@@ -530,7 +594,7 @@ export default function JobDetailPage() {
               )}
             </div>
 
-            {/* Artifact Actions (Copy, Expand/Minimize) */}
+            {/* Artifact Actions (Copy, Export File, Expand/Minimize) */}
             <div className="flex items-center gap-2">
               <button
                 onClick={copyReportToClipboard}
@@ -545,9 +609,18 @@ export default function JobDetailPage() {
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Report</span>
+                    <span>Copy</span>
                   </>
                 )}
+              </button>
+
+              <button
+                onClick={downloadReportFile}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-color)] transition-colors cursor-pointer"
+                title="Download report markdown file"
+              >
+                <FileDown className="w-3.5 h-3.5 text-[var(--accent-color)]" />
+                <span>Export .md</span>
               </button>
 
               <button
@@ -560,7 +633,7 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          {/* Rendered Markdown Report Body Canvas */}
+          {/* Rendered Markdown Report Body Canvas with Hover Image Download Overlay */}
           <div className={`flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 ${reportFlash ? 'report-updated-flash' : ''}`}>
             {job.livingReport ? (
               <div className="space-y-6">
@@ -572,7 +645,7 @@ export default function JobDetailPage() {
                   <span className="font-mono text-[var(--accent-color)]">{job.livingReport.themes.length} Grounded Themes</span>
                 </div>
 
-                {/* Rendered Markdown Canvas with Headings, Bullet Lists, and Uniform Accent Link Styling */}
+                {/* Rendered Markdown Canvas */}
                 <div className="prose prose-invert max-w-none prose-headings:font-semibold prose-headings:text-[var(--text-primary)] prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
                   <ReactMarkdown
                     components={{
@@ -584,20 +657,38 @@ export default function JobDetailPage() {
                           className="text-[var(--accent-color)] hover:underline font-medium transition-colors border-b border-[var(--accent-color)]/40 pb-0.5"
                         />
                       ),
-                      img: ({ node, ...props }) => (
-                        <div className="my-4 space-y-1">
-                          <img
-                            {...props}
-                            className="w-full max-h-80 object-cover rounded-2xl border border-[var(--border-color)] shadow-xl"
-                            alt={props.alt || 'Visual Research Artifact'}
-                          />
-                          {props.alt && (
-                            <span className="text-[11px] text-[var(--text-secondary)] italic block text-center">
-                              {props.alt}
-                            </span>
-                          )}
-                        </div>
-                      ),
+                      img: ({ node, ...props }) => {
+                        if (!props.src) return null;
+                        return (
+                          <div className="relative group my-4 rounded-2xl overflow-hidden border border-[var(--border-color)] shadow-2xl bg-[var(--bg-input)]">
+                            <img
+                              {...props}
+                              className="w-full max-h-80 object-cover transition-transform duration-300 group-hover:scale-105"
+                              alt={props.alt || 'Visual Research Evidence'}
+                            />
+                            {/* Hover Overlay Download Button */}
+                            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <a
+                                href={props.src}
+                                download={`research_evidence_${Date.now()}.jpg`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-1.5 border border-white/20 shadow-xl hover:bg-black transition-colors"
+                              >
+                                <Download className="w-3.5 h-3.5 text-[var(--accent-color)]" />
+                                <span>Download Image</span>
+                              </a>
+                            </div>
+                            {props.alt && (
+                              <div className="p-2 bg-[var(--bg-card)] border-t border-[var(--border-color)]/60 text-center">
+                                <span className="text-[11px] text-[var(--text-secondary)] italic">
+                                  {props.alt}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      },
                       table: ({ node, ...props }) => (
                         <div className="my-4 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] p-1">
                           <table {...props} className="w-full text-xs text-left text-[var(--text-primary)]" />

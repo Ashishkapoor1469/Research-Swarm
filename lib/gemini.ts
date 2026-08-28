@@ -54,7 +54,7 @@ Return ONLY valid JSON matching this structure:
 }`;
 
         const response = await aiClient.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
@@ -100,7 +100,7 @@ Return ONLY a JSON object with this exact structure:
 }`;
 
         const response = await aiClient.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
           config: {
             tools: [{ googleSearch: {} }],
@@ -200,7 +200,7 @@ Return ONLY JSON:
 }`;
 
         const response = await aiClient.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
           config: { responseMimeType: 'application/json' }
         });
@@ -249,7 +249,7 @@ Return ONLY valid JSON:
 }`;
 
         const response = await aiClient.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
           config: { responseMimeType: 'application/json' }
         });
@@ -309,7 +309,7 @@ Return ONLY JSON:
 }`;
 
         const response = await aiClient.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash',
           contents: prompt,
           config: { responseMimeType: 'application/json' }
         });

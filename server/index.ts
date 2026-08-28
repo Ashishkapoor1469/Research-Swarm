@@ -236,7 +236,7 @@ app.delete('/jobs/:id', async (req: Request, res: Response) => {
 app.post('/jobs/:id/followup', async (req: Request, res: Response) => {
   try {
     const jobId = req.params.id;
-    const { message } = req.body;
+    const { message, depth } = req.body;
 
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return res.status(400).json({ error: 'Follow-up message is required.' });
@@ -244,6 +244,14 @@ app.post('/jobs/:id/followup', async (req: Request, res: Response) => {
 
     const job = await dbStore.getJob(jobId);
     if (!job) return res.status(404).json({ error: 'Job not found.' });
+
+    // Update job depth if requested by mode switcher
+    if (depth && (depth === 'quick' || depth === 'standard' || depth === 'deep') && depth !== job.depth) {
+      const newMaxTasks = depth === 'quick' ? 8 : depth === 'deep' ? 25 : 12;
+      await dbStore.updateJob(jobId, { depth, maxTasks: newMaxTasks });
+      job.depth = depth;
+      job.maxTasks = newMaxTasks;
+    }
 
     const findings = await dbStore.getFindings(jobId);
     const existingTasks = await dbStore.getTasks(jobId);
