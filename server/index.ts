@@ -1,13 +1,13 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { dbStore } from '../lib/firestore';
 import { ResearchJob, JobDepth } from '../lib/types';
 import { initializeSwarmOrchestrator, launchNewJob } from './swarm_runner';
 import { GeminiService } from '../lib/gemini';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;

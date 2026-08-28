@@ -2,7 +2,9 @@ import { dbStore } from '../lib/firestore';
 import { TaskPubSubMessage, WorkerFinding } from '../lib/types';
 import { performWorkerResearch } from './search_tool';
 import { retryWithExponentialBackoff } from './retry';
+import { scrapeWebPage } from './web_scraper';
 import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
 
 export async function processWorkerTask(msg: TaskPubSubMessage): Promise<void> {
   const { jobId, taskId, subquestion, searchHint } = msg;
@@ -44,9 +46,9 @@ export async function processWorkerTask(msg: TaskPubSubMessage): Promise<void> {
   });
 
   try {
+    // Perform live web research
     const researchResult = await retryWithExponentialBackoff(
       async () => {
-        // Occasionally simulate a transient web timeout in 5% of runs to demonstrate retry resiliency!
         if (process.env.DEMO_SIMULATE_RETRY === 'true' && Math.random() < 0.1) {
           throw new Error("HTTP 503 Gateway Timeout fetching source web page");
         }
@@ -62,6 +64,22 @@ export async function processWorkerTask(msg: TaskPubSubMessage): Promise<void> {
         });
       }
     );
+
+    // Live Web Scraper Step: Scrape target source websites and persist raw text to disk
+    if (researchResult.sources && researchResult.sources.length > 0) {
+      const firstSource = researchResult.sources[0];
+      if (firstSource.url && firstSource.url.startsWith('http')) {
+        const scraped = await scrapeWebPage(firstSource.url, jobId);
+        if (scraped) {
+          await dbStore.addActivityLog(
+            jobId,
+            'WORKER',
+            `🕸️ Worker [${workerId}] scraped ${scraped.byteSize} bytes from "${scraped.title.slice(0, 40)}" & saved page text to disk (${path.basename(scraped.savedFilePath)})`,
+            { traceId, taskId, workerId, url: scraped.url, savedFile: scraped.savedFilePath }
+          );
+        }
+      }
+    }
 
     const endTime = Date.now();
     const completedAtIso = new Date(endTime).toISOString();
