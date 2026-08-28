@@ -30,6 +30,7 @@ interface ResearchTask {
   subquestion: string;
   searchHint: string;
   status: 'pending' | 'running' | 'done' | 'failed';
+  durationMs?: number;
   error?: string;
 }
 
@@ -109,10 +110,8 @@ export default function JobDetailPage() {
       }
     }
 
-    // Initial fetch
     fetchJobState();
 
-    // SSE connection for realtime streaming
     try {
       eventSource = new EventSource(`/api/jobs/${jobId}/events`);
       eventSource.onmessage = (event) => {
@@ -126,9 +125,7 @@ export default function JobDetailPage() {
       };
 
       eventSource.onerror = () => {
-        console.warn('SSE connection failed, falling back to polling');
         if (eventSource) eventSource.close();
-        // Fallback polling
         pollInterval = setInterval(fetchJobState, 2500);
       };
     } catch (e) {
@@ -144,22 +141,20 @@ export default function JobDetailPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-12 h-12 rounded-2xl glow-gradient flex items-center justify-center animate-spin">
-          <RefreshCw className="w-6 h-6 text-white" />
-        </div>
-        <p className="text-gray-400 text-sm animate-pulse">Connecting to Research Swarm Telemetry...</p>
+        <div className="w-10 h-10 rounded-full border-2 border-[var(--accent-color)] border-t-transparent animate-spin"></div>
+        <p className="text-[var(--text-secondary)] text-sm animate-pulse font-serif">Connecting to Research Swarm Telemetry...</p>
       </div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="max-w-2xl mx-auto p-8 glass-card rounded-2xl border border-red-900/50 text-center space-y-4">
+      <div className="max-w-2xl mx-auto p-8 claude-card rounded-2xl border border-red-900/50 text-center space-y-4">
         <AlertCircle className="w-12 h-12 text-red-400 mx-auto" />
-        <h2 className="text-xl font-bold text-white">Job Not Found</h2>
-        <p className="text-gray-400 text-sm">{error || 'The requested research job ID could not be retrieved.'}</p>
-        <Link href="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800 text-white text-sm hover:bg-gray-700">
-          <ArrowLeft className="w-4 h-4" /> Return to Home
+        <h2 className="text-xl font-serif font-semibold text-[var(--text-primary)]">Job Not Found</h2>
+        <p className="text-[var(--text-secondary)] text-sm">{error || 'The requested research job ID could not be retrieved.'}</p>
+        <Link href="/" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--bg-input)] text-[var(--text-primary)] text-sm border border-[var(--border-color)]">
+          <ArrowLeft className="w-4 h-4" /> Return to Dispatcher
         </Link>
       </div>
     );
@@ -169,18 +164,18 @@ export default function JobDetailPage() {
   const isComplete = job.status === 'completed';
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-6 pb-12 w-full">
       {/* Top Header & Breadcrumb */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border-color)]/60 pb-6">
         <div>
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline mb-2 font-medium">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Dispatcher
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+          <h1 className="font-serif-claude text-2xl sm:text-3xl font-normal text-[var(--text-primary)] tracking-tight leading-snug">
             "{job.question}"
           </h1>
-          <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-            <span>Job ID: <code className="text-cyan-400">{job.id.slice(0, 18)}...</code></span>
+          <div className="flex items-center gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+            <span>Job ID: <code className="text-[var(--accent-color)] font-mono">{job.id.slice(0, 18)}...</code></span>
             <span>•</span>
             <span className="capitalize">Depth: {job.depth}</span>
             <span>•</span>
@@ -191,12 +186,12 @@ export default function JobDetailPage() {
         {/* Status Badge */}
         <div className="flex items-center gap-3">
           {isComplete ? (
-            <div className="px-4 py-2 rounded-full bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-sm font-semibold flex items-center gap-2 shadow-lg shadow-emerald-900/30">
+            <div className="px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--accent-color)]/50 text-[var(--accent-color)] text-xs font-semibold flex items-center gap-2 shadow-sm">
               <CheckCircle2 className="w-4 h-4" /> Final Report Synthesized
             </div>
           ) : (
-            <div className="px-4 py-2 rounded-full bg-cyan-950/80 border border-cyan-500/50 text-cyan-300 text-sm font-semibold flex items-center gap-2 shadow-lg shadow-cyan-900/30 animate-pulse">
-              <RefreshCw className="w-4 h-4 animate-spin" /> Swarm Active ({progressPercent}%)
+            <div className="px-4 py-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-color)] text-xs font-semibold flex items-center gap-2 shadow-sm">
+              <RefreshCw className="w-4 h-4 animate-spin text-[var(--accent-color)]" /> Swarm Active ({progressPercent}%)
             </div>
           )}
         </div>
@@ -204,48 +199,46 @@ export default function JobDetailPage() {
 
       {/* Walk Away Banner */}
       {!isComplete && (
-        <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/60 via-purple-950/40 to-gray-900/60 border border-cyan-800/40 flex items-start sm:items-center justify-between gap-4 shadow-lg">
+        <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-start sm:items-center justify-between gap-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-cyan-900/50 flex items-center justify-center text-cyan-400 shrink-0">
-              <Clock className="w-5 h-5 animate-pulse" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--bg-input)] flex items-center justify-center text-[var(--accent-color)] shrink-0">
+              <Clock className="w-4 h-4" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white">Walk-Away Mode Active</h4>
-              <p className="text-xs text-gray-300">
-                You can close this tab or leave your screen. The Coordinator, Worker Fleet & Synthesizer will continue running asynchronously in the background.
+              <h4 className="text-xs font-semibold text-[var(--text-primary)]">Walk-Away Mode Active</h4>
+              <p className="text-xs text-[var(--text-secondary)]">
+                You can close this tab or leave your screen. The Coordinator, Worker Fleet & Synthesizer will continue running asynchronously.
               </p>
             </div>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-md bg-cyan-900/80 text-cyan-300 border border-cyan-700/50 font-mono shrink-0 hidden sm:inline-block">
+          <span className="text-[10px] px-2.5 py-1 rounded-md bg-[var(--bg-input)] text-[var(--accent-color)] border border-[var(--border-color)] font-mono shrink-0 hidden sm:inline-block">
             Cloud Run + Pub/Sub
           </span>
         </div>
       )}
 
       {/* Swarm Progress Bar */}
-      <div className="glass-card p-6 rounded-2xl border border-gray-800 space-y-4">
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-2 font-semibold text-white">
-            <Cpu className="w-4 h-4 text-cyan-400" />
+      <div className="claude-card p-5 rounded-2xl space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 font-semibold text-[var(--text-primary)]">
+            <Cpu className="w-4 h-4 text-[var(--accent-color)]" />
             <span>Swarm Execution Progress</span>
           </div>
-          <span className="font-mono text-cyan-400 font-bold">
+          <span className="font-mono text-[var(--accent-color)] font-bold">
             {job.tasksCompleted} / {job.tasksTotal} Tasks Done ({progressPercent}%)
           </span>
         </div>
 
-        {/* Progress Bar Container */}
-        <div className="w-full bg-gray-900 rounded-full h-3 overflow-hidden p-0.5 border border-gray-800">
+        <div className="w-full bg-[var(--bg-input)] rounded-full h-2.5 overflow-hidden p-0.5 border border-[var(--border-color)]">
           <div
-            className="h-full rounded-full glow-gradient transition-all duration-700 ease-out"
-            style={{ width: `${progressPercent}%` }}
+            className="h-full rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${progressPercent}%`, backgroundColor: 'var(--accent-color)' }}
           ></div>
         </div>
 
-        {/* Re-planning Indicator */}
         {job.replanningCount > 0 && (
-          <div className="flex items-center gap-2 text-xs text-purple-300 bg-purple-950/40 px-3 py-1.5 rounded-lg border border-purple-800/40">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-spin-slow" />
+          <div className="flex items-center gap-2 text-xs text-[var(--accent-color)] bg-[var(--bg-input)] px-3 py-1.5 rounded-lg border border-[var(--border-color)]">
+            <Sparkles className="w-3.5 h-3.5" />
             <span>
               Coordinator Re-planner triggered! Dynamically added follow-up sub-questions based on intermediate findings.
             </span>
@@ -254,19 +247,19 @@ export default function JobDetailPage() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-gray-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-2">
         <button
           onClick={() => setActiveTab('report')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all ${
             activeTab === 'report'
-              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 shadow-md'
-              : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
+              ? 'bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <FileText className="w-4 h-4" />
           <span>Living Research Report</span>
           {job.livingReport && (
-            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-cyan-900 text-cyan-300 font-mono">
+            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-[var(--border-color)] text-[var(--accent-color)] font-mono">
               v{job.livingReport.version}
             </span>
           )}
@@ -274,25 +267,25 @@ export default function JobDetailPage() {
 
         <button
           onClick={() => setActiveTab('swarm')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all ${
             activeTab === 'swarm'
-              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 shadow-md'
-              : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
+              ? 'bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <Activity className="w-4 h-4" />
-          <span>Swarm Telemetry & Timeline</span>
-          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-800 text-gray-300 font-mono">
+          <span>Swarm Telemetry</span>
+          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-[var(--border-color)] text-[var(--text-secondary)] font-mono">
             {job.activityLog.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab('findings')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs transition-all ${
             activeTab === 'findings'
-              ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 shadow-md'
-              : 'text-gray-400 hover:text-white hover:bg-gray-900/50'
+              ? 'bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-sm'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -302,34 +295,34 @@ export default function JobDetailPage() {
 
       {/* Tab 1: Living Research Report */}
       {activeTab === 'report' && (
-        <div className={`glass-card p-6 sm:p-8 rounded-2xl border border-gray-800 space-y-6 ${reportFlash ? 'report-updated-flash' : ''}`}>
+        <div className={`claude-card p-6 sm:p-8 rounded-2xl space-y-6 ${reportFlash ? 'report-updated-flash' : ''}`}>
           {job.livingReport ? (
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-gray-800 pb-4">
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <Clock className="w-4 h-4 text-cyan-400" />
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
+                <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                  <Clock className="w-4 h-4 text-[var(--accent-color)]" />
                   <span>Last synthesized: {new Date(job.livingReport.updatedAt).toLocaleTimeString()}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60 font-semibold">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--bg-input)] text-[var(--accent-color)] border border-[var(--border-color)] font-semibold">
                     Version {job.livingReport.version}
                   </span>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-purple-950 text-purple-400 border border-purple-800/60 font-semibold">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-color)] font-semibold">
                     {job.livingReport.themes.length} Themes Synthesized
                   </span>
                 </div>
               </div>
 
               {/* Render Full Markdown with styling */}
-              <div className="prose prose-invert max-w-none prose-headings:text-cyan-300 prose-a:text-cyan-400 prose-a:underline hover:prose-a:text-cyan-300 prose-strong:text-white prose-blockquote:border-cyan-500 prose-blockquote:bg-cyan-950/30 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg">
+              <div className="prose prose-invert max-w-none prose-headings:font-serif prose-headings:text-[var(--text-primary)] prose-a:text-[var(--accent-color)] prose-a:underline hover:prose-a:opacity-80 prose-blockquote:border-[var(--accent-color)] prose-blockquote:bg-[var(--bg-input)] prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg text-sm text-[var(--text-primary)] leading-relaxed">
                 <ReactMarkdown>{job.livingReport.fullMarkdown}</ReactMarkdown>
               </div>
             </div>
           ) : (
             <div className="text-center py-12 space-y-3">
-              <RefreshCw className="w-8 h-8 text-cyan-400 animate-spin mx-auto" />
-              <p className="text-gray-300 font-semibold">Synthesizing Initial Report Structure...</p>
-              <p className="text-xs text-gray-500">Worker agents are currently fetching grounded web sources.</p>
+              <RefreshCw className="w-8 h-8 text-[var(--accent-color)] animate-spin mx-auto" />
+              <p className="text-[var(--text-primary)] font-semibold font-serif">Synthesizing Initial Report Structure...</p>
+              <p className="text-xs text-[var(--text-secondary)]">Worker agents are currently fetching grounded web sources.</p>
             </div>
           )}
         </div>
@@ -337,31 +330,31 @@ export default function JobDetailPage() {
 
       {/* Tab 2: Swarm Activity Telemetry & Timeline */}
       {activeTab === 'swarm' && (
-        <div className="glass-card p-6 rounded-2xl border border-gray-800 space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-3">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Activity className="w-4 h-4 text-cyan-400" />
+        <div className="claude-card p-6 rounded-2xl space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[var(--accent-color)]" />
               Live Swarm Activity Stream
             </h3>
-            <span className="text-xs text-gray-400 font-mono">Realtime Pub/Sub Events</span>
+            <span className="text-xs text-[var(--text-secondary)] font-mono">Realtime Pub/Sub Events</span>
           </div>
 
-          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+          <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-2">
             {job.activityLog.slice().reverse().map((item, idx) => (
-              <div key={idx} className="p-3 rounded-xl bg-gray-950/70 border border-gray-800/80 flex items-start gap-3 text-xs">
+              <div key={idx} className="p-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)]/60 flex items-start gap-3 text-xs">
                 <div className="shrink-0 pt-0.5">
-                  {item.agent === 'COORDINATOR' && <div className="w-6 h-6 rounded-lg bg-purple-950 text-purple-400 border border-purple-800 flex items-center justify-center font-bold text-[10px]">C</div>}
-                  {item.agent === 'WORKER' && <div className="w-6 h-6 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center font-bold text-[10px]">W</div>}
-                  {item.agent === 'SYNTHESIZER' && <div className="w-6 h-6 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center justify-center font-bold text-[10px]">S</div>}
-                  {item.agent === 'SYSTEM' && <div className="w-6 h-6 rounded-lg bg-gray-900 text-gray-400 border border-gray-800 flex items-center justify-center font-bold text-[10px]">SYS</div>}
+                  {item.agent === 'COORDINATOR' && <div className="w-6 h-6 rounded-lg bg-[var(--bg-card)] text-[var(--accent-color)] border border-[var(--border-color)] flex items-center justify-center font-bold text-[10px]">C</div>}
+                  {item.agent === 'WORKER' && <div className="w-6 h-6 rounded-lg bg-[var(--bg-card)] text-[var(--accent-color)] border border-[var(--border-color)] flex items-center justify-center font-bold text-[10px]">W</div>}
+                  {item.agent === 'SYNTHESIZER' && <div className="w-6 h-6 rounded-lg bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center justify-center font-bold text-[10px]">S</div>}
+                  {item.agent === 'SYSTEM' && <div className="w-6 h-6 rounded-lg bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)] flex items-center justify-center font-bold text-[10px]">SYS</div>}
                 </div>
 
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-300">{item.agent}</span>
-                    <span className="text-[10px] text-gray-500 font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{item.agent}</span>
+                    <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
                   </div>
-                  <p className="text-gray-300 leading-relaxed">{item.message}</p>
+                  <p className="text-[var(--text-secondary)] leading-relaxed">{item.message}</p>
                 </div>
               </div>
             ))}
@@ -376,47 +369,47 @@ export default function JobDetailPage() {
             {tasks.map((task, idx) => {
               const finding = findings.find(f => f.taskId === task.id);
               return (
-                <div key={task.id} className="glass-card p-5 rounded-xl border border-gray-800 space-y-3">
+                <div key={task.id} className="claude-card p-5 rounded-xl space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">
+                    <span className="text-xs font-mono text-[var(--accent-color)] bg-[var(--bg-input)] px-2 py-0.5 rounded border border-[var(--border-color)]">
                       Task #{idx + 1}
                     </span>
 
                     {task.status === 'done' && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1 font-semibold">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-input)] text-[var(--accent-color)] border border-[var(--border-color)] flex items-center gap-1 font-semibold">
                         <CheckCircle2 className="w-3 h-3" /> Done
                       </span>
                     )}
                     {task.status === 'running' && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 flex items-center gap-1 font-semibold animate-pulse">
-                        <RefreshCw className="w-3 h-3 animate-spin" /> Searching Web...
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-input)] text-[var(--text-primary)] border border-[var(--border-color)] flex items-center gap-1 font-semibold animate-pulse">
+                        <RefreshCw className="w-3 h-3 animate-spin text-[var(--accent-color)]" /> Searching...
                       </span>
                     )}
                     {task.status === 'pending' && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-gray-900 text-gray-400 border border-gray-800 font-semibold">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-input)] text-[var(--text-secondary)] border border-[var(--border-color)] font-semibold">
                         Queued
                       </span>
                     )}
                   </div>
 
-                  <h4 className="text-sm font-semibold text-white leading-snug">
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)] leading-snug">
                     {task.subquestion}
                   </h4>
 
-                  <p className="text-xs text-gray-500 font-mono">
+                  <p className="text-xs text-[var(--text-secondary)] font-mono">
                     Search Strategy: "{task.searchHint}"
                   </p>
 
                   {finding && (
-                    <div className="pt-2 border-t border-gray-800/80 space-y-2">
-                      <p className="text-xs text-gray-300 line-clamp-3 leading-relaxed">
+                    <div className="pt-2 border-t border-[var(--border-color)]/60 space-y-2">
+                      <p className="text-xs text-[var(--text-secondary)] line-clamp-3 leading-relaxed">
                         {finding.summary}
                       </p>
-                      <div className="flex items-center justify-between text-[11px] text-gray-400">
+                      <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
                         <span>{finding.keyFacts.length} Facts Extracted</span>
                         <span>{finding.sources.length} Grounded Sources</span>
                         {task.durationMs && (
-                          <span className="font-mono text-cyan-400">⚡ {task.durationMs}ms</span>
+                          <span className="font-mono text-[var(--accent-color)]">⚡ {task.durationMs}ms</span>
                         )}
                       </div>
                     </div>
