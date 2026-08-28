@@ -285,16 +285,16 @@ export default function JobDetailPage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Top Header Bar with Mode Selector Badge */}
-      <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-3">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline font-medium">
+      {/* Top Header Bar with Mode Selector Badge - Mobile Responsive */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-color)]/60 pb-3">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline font-medium shrink-0">
             <ArrowLeft className="w-3.5 h-3.5" /> Back
           </Link>
-          <span className="text-[var(--text-secondary)] text-xs">•</span>
+          <span className="text-[var(--text-secondary)] text-xs hidden sm:inline">•</span>
           
           {/* Depth / Mode Pill */}
-          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border ${
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border shrink-0 ${
             selectedDepth === 'quick' ? 'bg-cyan-950/40 text-cyan-400 border-cyan-800' :
             selectedDepth === 'deep' ? 'bg-amber-950/40 text-amber-400 border-amber-800' :
             'bg-purple-950/40 text-purple-400 border-purple-800'
@@ -302,14 +302,14 @@ export default function JobDetailPage() {
             {selectedDepth === 'quick' ? '⚡ Quick (4 Tasks)' : selectedDepth === 'deep' ? '🔬 Deep Research (25 Tasks)' : '🎯 Standard (6 Tasks)'}
           </span>
 
-          <h1 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-md">
+          <h1 className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] truncate max-w-xs sm:max-w-md">
             {job.question}
           </h1>
         </div>
 
         {/* Grounded Audit Pass Badge & Status Pill */}
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-1 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[11px] text-emerald-400 font-mono flex items-center gap-1">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--bg-input)] border border-[var(--border-color)] text-[10px] sm:text-[11px] text-emerald-400 font-mono flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5" /> Grounded Audit Pass
           </span>
 
@@ -325,12 +325,12 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      {/* 3-COLUMN RESTRUCTURED LAYOUT */}
+      {/* 3-COLUMN RESTRUCTURED RESPONSIVE LAYOUT */}
       <div className={`grid grid-cols-1 ${isExpanded ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-6 items-start`}>
         
-        {/* COLUMN 2 (Middle, ~35% width / col-span-5): Clean Chat Thread Pane */}
+        {/* COLUMN 2 (Middle, ~35% width / col-span-5): Responsive Clean Chat Thread Pane */}
         {!isExpanded && (
-          <div className="lg:col-span-5 flex flex-col h-[calc(100vh-160px)] claude-card rounded-2xl p-4 shadow-xl overflow-hidden">
+          <div className="lg:col-span-5 flex flex-col h-[520px] lg:h-[calc(100vh-160px)] claude-card rounded-2xl p-3 sm:p-4 shadow-xl overflow-hidden">
             
             {/* Chat Thread Messages Stream */}
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
