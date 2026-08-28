@@ -263,14 +263,24 @@ export default function JobDetailPage() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Top Header Bar */}
+      {/* Top Header Bar with Mode Badge */}
       <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-3">
         <div className="flex items-center gap-3">
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-[var(--accent-color)] hover:underline font-medium">
             <ArrowLeft className="w-3.5 h-3.5" /> Back
           </Link>
           <span className="text-[var(--text-secondary)] text-xs">•</span>
-          <h1 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-xl">
+          
+          {/* Depth / Mode Badge */}
+          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border ${
+            job.depth === 'quick' ? 'bg-cyan-950/40 text-cyan-400 border-cyan-800' :
+            job.depth === 'deep' ? 'bg-amber-950/40 text-amber-400 border-amber-800' :
+            'bg-purple-950/40 text-purple-400 border-purple-800'
+          }`}>
+            {job.depth === 'quick' ? '⚡ Quick (4 Tasks)' : job.depth === 'deep' ? '🔬 Deep Research (25 Tasks)' : '🎯 Standard (6 Tasks)'}
+          </span>
+
+          <h1 className="text-sm font-semibold text-[var(--text-primary)] truncate max-w-md">
             {job.question}
           </h1>
         </div>
@@ -573,6 +583,40 @@ export default function JobDetailPage() {
                           rel="noopener noreferrer"
                           className="text-[var(--accent-color)] hover:underline font-medium transition-colors border-b border-[var(--accent-color)]/40 pb-0.5"
                         />
+                      ),
+                      img: ({ node, ...props }) => (
+                        <div className="my-4 space-y-1">
+                          <img
+                            {...props}
+                            className="w-full max-h-80 object-cover rounded-2xl border border-[var(--border-color)] shadow-xl"
+                            alt={props.alt || 'Visual Research Artifact'}
+                          />
+                          {props.alt && (
+                            <span className="text-[11px] text-[var(--text-secondary)] italic block text-center">
+                              {props.alt}
+                            </span>
+                          )}
+                        </div>
+                      ),
+                      table: ({ node, ...props }) => (
+                        <div className="my-4 overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] p-1">
+                          <table {...props} className="w-full text-xs text-left text-[var(--text-primary)]" />
+                        </div>
+                      ),
+                      th: ({ node, ...props }) => (
+                        <th {...props} className="px-3 py-2 bg-[var(--bg-card)] border-b border-[var(--border-color)] font-semibold text-[var(--accent-color)]" />
+                      ),
+                      td: ({ node, ...props }) => (
+                        <td {...props} className="px-3 py-2 border-b border-[var(--border-color)]/40" />
+                      ),
+                      code: ({ node, inline, ...props }: any) => (
+                        inline ? (
+                          <code {...props} className="px-1.5 py-0.5 rounded bg-[var(--bg-input)] border border-[var(--border-color)] font-mono text-[11px] text-[var(--accent-color)]" />
+                        ) : (
+                          <pre className="p-4 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] font-mono text-xs overflow-x-auto text-emerald-400 my-4 shadow-inner">
+                            <code {...props} />
+                          </pre>
+                        )
                       )
                     }}
                   >
