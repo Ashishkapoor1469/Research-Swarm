@@ -61,35 +61,49 @@ export default function HomePage() {
       const res = await fetch('/api/workspaces');
       if (res.ok) {
         const data = await res.json();
-        setWorkspaces(data || []);
         if (data && data.length > 0) {
+          setWorkspaces(data);
           setSelectedWorkspaceId(data[0].id);
+          setLoadingWorkspaces(false);
+          return;
         }
       }
     } catch (e) {
-      console.error('Error fetching workspaces:', e);
-    } finally {
-      setLoadingWorkspaces(false);
+      console.warn('Backend API unavailable, initializing default workspace:', e);
     }
+    
+    // Default workspace fallback for hosted environments
+    const defaultWs: Workspace = { id: 'ws-default', name: 'Default Research Workspace', color: '#d97745', fileCount: 0 };
+    setWorkspaces([defaultWs]);
+    setSelectedWorkspaceId(defaultWs.id);
+    setLoadingWorkspaces(false);
   }
 
   async function handleCreateWorkspaceQuick() {
     if (!newWsName.trim()) return;
+    const wsName = newWsName.trim();
+    const localWs: Workspace = {
+      id: `ws-${Date.now()}`,
+      name: wsName,
+      color: '#d97745',
+      fileCount: 0
+    };
+
+    // Update UI immediately
+    setWorkspaces(prev => [localWs, ...prev.filter(w => w.id !== 'ws-default')]);
+    setSelectedWorkspaceId(localWs.id);
+    setShowWorkspaceModal(false);
+    setNewWsName('');
+
+    // Try posting to backend
     try {
-      const res = await fetch('/api/workspaces', {
+      await fetch('/api/workspaces', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newWsName.trim() })
+        body: JSON.stringify({ name: wsName })
       });
-      if (res.ok) {
-        const created = await res.json();
-        setWorkspaces([created, ...workspaces]);
-        setSelectedWorkspaceId(created.id);
-        setShowWorkspaceModal(false);
-        setNewWsName('');
-      }
     } catch (e) {
-      console.error('Error creating workspace:', e);
+      console.warn('Workspace saved locally for hosted session.');
     }
   }
 
@@ -97,11 +111,7 @@ export default function HomePage() {
     e.preventDefault();
     if (!question.trim() || isSubmitting) return;
 
-    if (!selectedWorkspaceId) {
-      setError('Please select or create a workspace before dispatching a research swarm.');
-      return;
-    }
-
+    const wsId = selectedWorkspaceId || 'ws-default';
     setIsSubmitting(true);
     setError(null);
 
@@ -113,7 +123,7 @@ export default function HomePage() {
           question: question.trim(),
           fileName: fileName.trim() || question.trim(),
           depth,
-          workspaceId: selectedWorkspaceId,
+          workspaceId: wsId,
           model: selectedModel.id
         })
       });
@@ -266,7 +276,7 @@ export default function HomePage() {
                 </button>
 
                 {showModelDropdown && (
-                  <div className="absolute right-0 bottom-full mb-2 w-72 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 space-y-1">
+                  <div className="absolute right-0 top-full sm:bottom-full sm:top-auto mt-2 sm:mb-2 w-64 sm:w-72 max-w-[calc(100vw-32px)] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl p-2 z-50 space-y-1">
                     <div className="px-3 py-1.5 text-[10px] uppercase font-semibold text-[var(--text-secondary)] tracking-wider">
                       Select Swarm Reasoning Model
                     </div>
