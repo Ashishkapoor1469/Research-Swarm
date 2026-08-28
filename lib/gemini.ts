@@ -157,9 +157,9 @@ Return ONLY a JSON object with this exact structure:
       }
     }
 
-    // Realistic Multi-round Execution Latency in Fallback Mode (1500ms search latency per round)
+    // Realistic Multi-round Execution Latency (1500ms per worker step so user sees searching state and step-by-step progress)
     const simulatedRounds = depth === 'deep' ? 2 : 1;
-    await new Promise(r => setTimeout(r, 1200 * simulatedRounds));
+    await new Promise(r => setTimeout(r, 1500 * simulatedRounds));
 
     return GeminiService.generateFallbackWorkerResult(subquestion, searchHint);
   }
@@ -356,13 +356,16 @@ Return ONLY JSON:
         { subquestion: "What is the timeline for enforcement and grace periods for AI Act compliance?", searchHint: "EU AI Act implementation timeline enforcement dates 2025 2026" }
       ];
     } else {
+      // Clean topic name to prevent awkward subquestion duplication (e.g. "What drivers behind How will...")
+      const cleanTopic = question.trim().replace(/\?+$/, '').replace(/^(how will|what are|what is|how do|why do|research on|investigate)\s+/i, '');
+
       subqs = [
-        { subquestion: `What are the core technical & economic drivers behind ${question}?`, searchHint: `${question} core drivers statistics market size` },
-        { subquestion: `What regulatory frameworks and policy considerations govern ${question}?`, searchHint: `${question} regulation policy framework legal` },
-        { subquestion: `What are key competitive challenges and market risks regarding ${question}?`, searchHint: `${question} market risk challenge critique` },
-        { subquestion: `What emerging trends and future developments will shape ${question}?`, searchHint: `${question} future outlook 2026 trends forecast` },
-        { subquestion: `What real-world case studies or company implementations exist for ${question}?`, searchHint: `${question} case study industry adoption examples` },
-        { subquestion: `What key expert consensus and counter-arguments exist regarding ${question}?`, searchHint: `${question} expert opinion debate criticism` }
+        { subquestion: `What core technical and market drivers shape ${cleanTopic}?`, searchHint: `${cleanTopic} core drivers statistics market size` },
+        { subquestion: `What regulatory frameworks, data privacy, and legal policies govern ${cleanTopic}?`, searchHint: `${cleanTopic} regulation policy framework legal` },
+        { subquestion: `What key competitive challenges, risk factors, and operational limits affect ${cleanTopic}?`, searchHint: `${cleanTopic} market risk challenge critique` },
+        { subquestion: `What emerging 2026 technological trends and adoption forecasts shape ${cleanTopic}?`, searchHint: `${cleanTopic} future outlook 2026 trends forecast` },
+        { subquestion: `What real-world case studies and enterprise deployments exist for ${cleanTopic}?`, searchHint: `${cleanTopic} case study industry adoption examples` },
+        { subquestion: `What expert consensus, performance benchmarks, and counter-arguments exist on ${cleanTopic}?`, searchHint: `${cleanTopic} expert opinion debate criticism` }
       ];
     }
 
