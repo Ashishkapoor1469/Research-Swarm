@@ -276,264 +276,210 @@ export default function JobDetailPage() {
         </div>
       </div>
 
-      {/* 3-COLUMN RESTRUCTURED LAYOUT */}
+      {/* 3-COLUMN CLAUDE ARTIFACT LAYOUT */}
       <div className={`grid grid-cols-1 ${isExpanded ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-6 items-start`}>
         
-        {/* COLUMN 2 (Middle, ~35% width / col-span-5): Activity & Chat Pane */}
+        {/* COLUMN 2 (Middle, ~35% width / col-span-5): Clean Chat Thread Pane */}
         {!isExpanded && (
-          <div className="lg:col-span-5 flex flex-col space-y-4 h-[calc(100vh-160px)]">
+          <div className="lg:col-span-5 flex flex-col h-[calc(100vh-160px)] claude-card rounded-2xl p-4 shadow-xl overflow-hidden">
             
-            {/* ✳ Live "Current Work" Status Indicator */}
-            <div className="claude-card rounded-2xl border border-[var(--border-color)] p-3 shrink-0 space-y-2 shadow-md">
-              <button
-                onClick={() => setStatusAccordionOpen(!statusAccordionOpen)}
-                className="w-full flex items-center justify-between text-xs text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <span className={`text-base select-none ${statusIconAnimated ? 'animate-pulse text-[var(--accent-color)]' : statusColor}`}>
-                    {isComplete ? '✓' : '✳'}
+            {/* Chat Thread Messages Stream */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+              
+              {/* Initial User Request Message Card */}
+              <div className="p-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--accent-color)]/40 space-y-1.5 shadow-sm">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-[var(--accent-color)] text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                    <User className="w-3 h-3" /> ● You
                   </span>
-                  <span className={`font-semibold text-xs ${statusColor}`}>
-                    {statusText}
-                  </span>
+                  <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(job.createdAt).toLocaleTimeString()}</span>
                 </div>
-                {statusAccordionOpen ? (
-                  <ChevronUp className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                ) : (
-                  <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                )}
-              </button>
+                <p className="text-[var(--text-primary)] font-medium text-xs leading-relaxed">{job.question}</p>
+              </div>
 
-              {/* Expandable Accordion for Live Active Details */}
-              {statusAccordionOpen && (
-                <div className="pt-2 border-t border-[var(--border-color)]/60 text-[11px] text-[var(--text-secondary)] space-y-1">
-                  {activeRunningTask && (
-                    <div className="p-2 rounded-lg bg-[var(--bg-input)] border border-[var(--border-color)]">
-                      <span className="font-semibold text-[var(--text-primary)] block">Active Sub-Question:</span>
-                      <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">"{activeRunningTask.subquestion}"</p>
+              {/* Collapsible Swarm Telemetry & Thinking Block (Claude Style) */}
+              <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-input)] overflow-hidden shadow-md">
+                
+                {/* Collapsible Header Status Bar */}
+                <button
+                  onClick={() => setStatusAccordionOpen(!statusAccordionOpen)}
+                  className="w-full p-3 flex items-center justify-between text-xs bg-[var(--bg-card)] hover:bg-[var(--bg-input)] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`text-base select-none ${statusIconAnimated ? 'animate-pulse text-[var(--accent-color)]' : statusColor}`}>
+                      {isComplete ? '✓' : '✳'}
+                    </span>
+                    <span className={`font-semibold text-xs ${statusColor}`}>
+                      {statusText}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-secondary)] font-mono">
+                      ({tasksCompleted}/{tasksTotal} Tasks)
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-[var(--text-secondary)] font-mono">
+                      {statusAccordionOpen ? 'Hide Execution' : 'View Execution'}
+                    </span>
+                    {statusAccordionOpen ? (
+                      <ChevronUp className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                    ) : (
+                      <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Expanded Swarm Execution Telemetry Menu (Fleet Progress + Worker Cards + Live Log Stream) */}
+                {statusAccordionOpen && (
+                  <div className="p-4 border-t border-[var(--border-color)] space-y-4 bg-[var(--bg-sidebar)] animate-in fade-in duration-200">
+                    
+                    {/* Fleet Execution Progress Bar */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
+                          <Cog className="w-4 h-4 text-[var(--accent-color)]" />
+                          <span>Fleet Execution</span>
+                        </span>
+                        <span className="font-mono text-[var(--accent-color)] font-bold">
+                          {tasksCompleted}/{tasksTotal} Done ({progressPercent}%)
+                        </span>
+                      </div>
+                      <div className="w-full bg-[var(--bg-input)] rounded-full h-2 overflow-hidden border border-[var(--border-color)]">
+                        <div
+                          className="h-full rounded-full transition-all duration-500 ease-out"
+                          style={{ width: `${progressPercent}%`, backgroundColor: 'var(--accent-color)' }}
+                        ></div>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex items-center justify-between text-[10px] font-mono pt-1">
-                    <span>Active Re-planning Iteration: #{job.replanningCount}</span>
-                    <span>Max Task Budget: {job.maxTasks || 20}</span>
+
+                    {/* Worker Agents Status Cards List */}
+                    {tasks.length > 0 && (
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block">
+                          Worker Agents ({tasksCompleted}/{tasksTotal} Complete)
+                        </span>
+                        <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
+                          {tasks.map((task, tIdx) => (
+                            <div key={task.id} className="p-2 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-xs">
+                              <span className="text-[11px] text-[var(--text-primary)] truncate max-w-[180px]" title={task.subquestion}>
+                                ▸ Worker {tIdx + 1}: {task.subquestion}
+                              </span>
+                              {task.status === 'done' && (
+                                <span className="px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800 text-[10px] font-medium flex items-center gap-1 shrink-0">
+                                  <CheckCircle className="w-3 h-3" /> Done
+                                </span>
+                              )}
+                              {task.status === 'running' && (
+                                <span className="px-2 py-0.5 rounded bg-amber-950/40 text-amber-400 border border-amber-800 text-[10px] font-medium flex items-center gap-1 animate-pulse shrink-0">
+                                  <Search className="w-3 h-3 animate-spin" /> Searching
+                                </span>
+                              )}
+                              {task.status === 'pending' && (
+                                <span className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-700 text-[10px] flex items-center gap-1 shrink-0">
+                                  <Hourglass className="w-3 h-3" /> Queued
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pub/Sub Telemetry Stream */}
+                    <div className="space-y-2 pt-2 border-t border-[var(--border-color)]/60">
+                      <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block">
+                        Pub/Sub Realtime Activity Stream
+                      </span>
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {job.activityLog.map((item, idx) => {
+                          const logId = `log-${item.timestamp}-${idx}`;
+                          const isUser = item.metadata?.agent === 'USER' || item.agent === ('USER' as any);
+                          const isLogExpanded = expandedLogId === logId;
+                          const finding = item.metadata?.taskId ? findings.find(f => f.taskId === item.metadata.taskId) : null;
+
+                          return (
+                            <div key={logId} className="p-2 rounded-xl border border-[var(--border-color)]/60 bg-[var(--bg-input)] space-y-1">
+                              <button
+                                onClick={() => setExpandedLogId(isLogExpanded ? null : logId)}
+                                className="w-full flex items-center justify-between text-left cursor-pointer"
+                              >
+                                <span className="font-semibold flex items-center gap-1 text-[10px]">
+                                  {isUser && <span className="px-1.5 py-0.2 rounded bg-[var(--accent-color)] text-white text-[9px] font-bold">● You</span>}
+                                  {!isUser && item.agent === 'COORDINATOR' && <span className="px-1.5 py-0.2 rounded bg-cyan-950/50 border border-cyan-800 text-cyan-400 text-[9px] font-semibold flex items-center gap-1"><GitFork className="w-2.5 h-2.5" /> ◆ COORDINATOR</span>}
+                                  {!isUser && item.agent === 'WORKER' && <span className="px-1.5 py-0.2 rounded bg-purple-950/50 border border-purple-800 text-purple-400 text-[9px] font-semibold flex items-center gap-1"><Bot className="w-2.5 h-2.5" /> ▸ WORKER</span>}
+                                  {!isUser && item.agent === 'SYNTHESIZER' && <span className="px-1.5 py-0.2 rounded bg-emerald-950/50 border border-emerald-800 text-emerald-400 text-[9px] font-semibold flex items-center gap-1"><FileText className="w-2.5 h-2.5" /> ◈ SYNTHESIZER</span>}
+                                  {!isUser && item.agent === 'SYSTEM' && <span className="px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-700 text-zinc-400 text-[9px]">⚙ SYSTEM</span>}
+                                </span>
+                                <span className="text-[9px] text-[var(--text-secondary)] font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
+                              </button>
+                              <p className="text-[var(--text-primary)] leading-relaxed text-[11px] font-normal">{item.message}</p>
+                              {isLogExpanded && (
+                                <div className="pt-1.5 border-t border-[var(--border-color)]/60 text-[10px] text-[var(--text-secondary)] space-y-1">
+                                  {item.metadata?.subquestion && <p><strong className="text-[var(--accent-color)]">Query:</strong> {item.metadata.subquestion}</p>}
+                                  {finding && finding.keyFacts.length > 0 && (
+                                    <div>
+                                      <strong className="text-emerald-400">Facts:</strong>
+                                      <ul className="list-disc pl-3">
+                                        {finding.keyFacts.map((f, i) => <li key={i}>{f}</li>)}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+              </div>
+
+              {/* Follow-up / Direct Coordinator Responses in Chat Thread */}
+              {job.activityLog.filter(item => item.metadata?.agent === 'USER' || item.agent === ('USER' as any)).map((userMsg, uIdx) => (
+                <div key={`user-thread-${uIdx}`} className="space-y-3">
+                  <div className="p-3 rounded-2xl bg-[var(--bg-card)] border border-[var(--accent-color)]/40 space-y-1 shadow-sm">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="px-2 py-0.5 rounded-full bg-[var(--accent-color)] text-white text-[10px] font-bold flex items-center gap-1">
+                        <User className="w-3 h-3" /> ● You
+                      </span>
+                      <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(userMsg.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <p className="text-[var(--text-primary)] font-medium text-xs">{userMsg.message}</p>
                   </div>
                 </div>
-              )}
+              ))}
+
+              <div ref={activityEndRef} />
             </div>
 
-            {/* ⚙ Fleet Execution Progress Bar */}
-            <div className="claude-card p-4 rounded-2xl space-y-3 shrink-0">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                  <Cog className="w-4 h-4 text-[var(--accent-color)]" />
-                  <span>Fleet Execution</span>
-                </span>
-                <span className="font-mono text-[var(--accent-color)] font-bold">
-                  {tasksCompleted}/{tasksTotal} Done ({progressPercent}%)
-                </span>
-              </div>
-
-              {/* Smooth CSS Width Transition Progress Bar */}
-              <div className="w-full bg-[var(--bg-input)] rounded-full h-2.5 overflow-hidden border border-[var(--border-color)]">
-                <div
-                  className="h-full rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${progressPercent}%`, backgroundColor: 'var(--accent-color)' }}
-                ></div>
-              </div>
-
-              {job.replanningCount > 0 && (
-                <div className="flex items-center gap-1.5 text-[11px] text-[var(--accent-color)] bg-[var(--bg-input)] px-2.5 py-1 rounded-lg border border-[var(--border-color)] font-medium">
-                  <Sparkles className="w-3 h-3" />
-                  <span>Coordinator Re-planner spawned follow-up task</span>
-                </div>
-              )}
-            </div>
-
-            {/* Worker Agents List */}
-            {tasks.length > 0 && (
-              <div className="claude-card p-3 rounded-2xl shrink-0 space-y-2 max-h-40 overflow-y-auto">
-                <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider block px-1">
-                  Worker Agents ({tasksCompleted}/{tasksTotal} Complete)
-                </span>
-                <div className="grid grid-cols-1 gap-1.5">
-                  {tasks.map((task) => (
-                    <div key={task.id} className="p-2 rounded-xl bg-[var(--bg-input)] border border-[var(--border-color)] flex items-center justify-between text-xs">
-                      <span className="text-[11px] text-[var(--text-primary)] truncate max-w-[200px]" title={task.subquestion}>
-                        ▸ {task.subquestion}
-                      </span>
-                      {task.status === 'done' && (
-                        <span className="px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800 text-[10px] font-medium flex items-center gap-1 shrink-0">
-                          <CheckCircle className="w-3 h-3" /> Done
-                        </span>
-                      )}
-                      {task.status === 'running' && (
-                        <span className="px-2 py-0.5 rounded bg-amber-950/40 text-amber-400 border border-amber-800 text-[10px] font-medium flex items-center gap-1 animate-pulse shrink-0">
-                          <Search className="w-3 h-3 animate-spin" /> Searching
-                        </span>
-                      )}
-                      {task.status === 'pending' && (
-                        <span className="px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-700 text-[10px] flex items-center gap-1 shrink-0">
-                          <Hourglass className="w-3 h-3" /> Queued
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Live Swarm Activity Telemetry Feed with Expandable Cards (Claude-style UI) */}
-            <div className="claude-card p-4 rounded-2xl flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between border-b border-[var(--border-color)]/60 pb-2.5 mb-3 shrink-0">
-                <h3 className="text-xs font-semibold text-[var(--text-primary)] flex items-center gap-2">
-                  <Activity className="w-3.5 h-3.5 text-[var(--accent-color)]" />
-                  <span>Swarm Activity Telemetry</span>
-                </h3>
-                <span className="text-[10px] text-[var(--text-secondary)] font-mono">Pub/Sub Realtime</span>
-              </div>
-
-              {/* Event Log Stream */}
-              <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs">
-                {job.activityLog.map((item, idx) => {
-                  const logId = `log-${item.timestamp}-${idx}`;
-                  const isUser = item.metadata?.agent === 'USER' || item.agent === ('USER' as any);
-                  const isLogExpanded = expandedLogId === logId;
-
-                  // Find corresponding finding if this is a worker log
-                  const finding = item.metadata?.taskId ? findings.find(f => f.taskId === item.metadata.taskId) : null;
-
-                  return (
-                    <div
-                      key={logId}
-                      className={`p-2.5 rounded-xl border space-y-1.5 transition-all duration-200 ${
-                        isUser ? 'bg-[var(--bg-card)] border-[var(--accent-color)]/50 shadow-sm' : 'bg-[var(--bg-input)] border-[var(--border-color)]/60'
-                      }`}
-                    >
-                      <button
-                        onClick={() => setExpandedLogId(isLogExpanded ? null : logId)}
-                        className="w-full flex items-center justify-between text-left cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          {isUser && <span className="px-2 py-0.5 rounded bg-[var(--accent-color)] text-white text-[10px] font-bold flex items-center gap-1"><User className="w-3 h-3" /> ● You</span>}
-                          {!isUser && item.agent === 'COORDINATOR' && <span className="px-2 py-0.5 rounded bg-cyan-950/50 border border-cyan-800 text-cyan-400 text-[10px] font-semibold flex items-center gap-1"><GitFork className="w-3 h-3" /> ◆ COORDINATOR</span>}
-                          {!isUser && item.agent === 'WORKER' && <span className="px-2 py-0.5 rounded bg-purple-950/50 border border-purple-800 text-purple-400 text-[10px] font-semibold flex items-center gap-1"><Bot className="w-3 h-3" /> ▸ WORKER</span>}
-                          {!isUser && item.agent === 'SYNTHESIZER' && <span className="px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-800 text-emerald-400 text-[10px] font-semibold flex items-center gap-1"><FileText className="w-3 h-3" /> ◈ SYNTHESIZER</span>}
-                          {!isUser && item.agent === 'SYSTEM' && <span className="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-400 text-[10px] flex items-center gap-1">⚙ SYSTEM</span>}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-[var(--text-secondary)] font-mono">{new Date(item.timestamp).toLocaleTimeString()}</span>
-                          {isLogExpanded ? (
-                            <ChevronUp className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                          ) : (
-                            <ChevronDown className="w-3.5 h-3.5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]" />
-                          )}
-                        </div>
-                      </button>
-
-                      {/* One-Line Summary */}
-                      <p className="text-[var(--text-primary)] leading-relaxed text-[11px] font-normal">{item.message}</p>
-
-                      {/* Problem 3: Expandable Detail View per Activity Step */}
-                      {isLogExpanded && (
-                        <div className="pt-2 border-t border-[var(--border-color)]/60 text-[11px] space-y-2 bg-[var(--bg-card)] p-2.5 rounded-lg">
-                          
-                          {/* WORKER EXPANDED DETAILS */}
-                          {item.agent === 'WORKER' && (
-                            <div className="space-y-1.5 text-[11px]">
-                              {item.metadata?.subquestion && (
-                                <div>
-                                  <span className="text-[var(--accent-color)] font-semibold block">Full Sub-question:</span>
-                                  <p className="text-[var(--text-primary)] font-medium">"{item.metadata.subquestion}"</p>
-                                </div>
-                              )}
-                              {item.metadata?.searchHint && (
-                                <div>
-                                  <span className="text-[var(--text-secondary)] font-mono block text-[10px]">Search Strategy Used:</span>
-                                  <span className="text-zinc-300 font-mono text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-input)] inline-block">
-                                    {item.metadata.searchHint}
-                                  </span>
-                                </div>
-                              )}
-                              {finding && finding.keyFacts.length > 0 && (
-                                <div>
-                                  <span className="text-emerald-400 font-semibold block text-[10px]">Extracted Facts Preview:</span>
-                                  <ul className="list-disc pl-4 space-y-0.5 text-[10px] text-[var(--text-primary)]">
-                                    {finding.keyFacts.map((fact, fIdx) => (
-                                      <li key={fIdx}>{fact}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                              <div className="flex items-center justify-between text-[10px] font-mono text-[var(--text-secondary)] pt-1">
-                                <span>Worker Execution Time: {item.metadata?.durationMs || 1850}ms</span>
-                                <span>Verified Sources: {finding?.sources.length || 2}</span>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* COORDINATOR EXPANDED DETAILS */}
-                          {item.agent === 'COORDINATOR' && (
-                            <div className="space-y-1 text-[11px]">
-                              <span className="text-cyan-400 font-semibold block">Coordinator Planning Decision:</span>
-                              <p className="text-[var(--text-primary)]">
-                                {item.metadata?.subquestions ? `Decomposed question into ${item.metadata.subquestions.length} parallel sub-questions.` : item.message}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* SYNTHESIZER EXPANDED DETAILS */}
-                          {item.agent === 'SYNTHESIZER' && (
-                            <div className="space-y-1 text-[11px]">
-                              <span className="text-emerald-400 font-semibold block">Synthesizer Synthesis Output:</span>
-                              <p className="text-[var(--text-primary)]">
-                                Compiled Living Report version v{job.livingReport?.version || 1} with {job.livingReport?.themes.length || 3} grounded themes.
-                              </p>
-                            </div>
-                          )}
-
-                          {/* USER EXPANDED DETAILS */}
-                          {isUser && (
-                            <div className="space-y-1 text-[11px]">
-                              <span className="text-[var(--accent-color)] font-semibold block">User Prompt Request:</span>
-                              <p className="text-[var(--text-primary)] font-medium">"{item.message}"</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-                <div ref={activityEndRef} />
-              </div>
-
-              {/* Follow-up Chat Input Box */}
-              <div className="pt-3 border-t border-[var(--border-color)]/60 mt-3 shrink-0">
-                <form
-                  onSubmit={handleSendFollowup}
-                  className="flex items-center gap-2 bg-[var(--bg-input)] p-1.5 rounded-xl border border-[var(--border-color)]"
+            {/* Pinned Follow-up Chat Input Box at Bottom */}
+            <div className="pt-3 border-t border-[var(--border-color)]/60 mt-3 shrink-0">
+              <form
+                onSubmit={handleSendFollowup}
+                className="flex items-center gap-2 bg-[var(--bg-input)] p-1.5 rounded-xl border border-[var(--border-color)]"
+              >
+                <input
+                  type="text"
+                  value={followupText}
+                  onChange={(e) => setFollowupText(e.target.value)}
+                  disabled={isSubmittingFollowup}
+                  placeholder={isSubmittingFollowup ? "Coordinator evaluating follow-up request..." : "Ask follow-up or redirect research..."}
+                  className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none px-2 placeholder:text-[var(--text-secondary)]/60 disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmittingFollowup || !followupText.trim()}
+                  className="p-1.5 rounded-lg bg-[var(--accent-color)] text-white hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
                 >
-                  <input
-                    type="text"
-                    value={followupText}
-                    onChange={(e) => setFollowupText(e.target.value)}
-                    disabled={isSubmittingFollowup}
-                    placeholder={isSubmittingFollowup ? "Coordinator evaluating follow-up request..." : "Ask follow-up or redirect research..."}
-                    className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none px-2 placeholder:text-[var(--text-secondary)]/60 disabled:opacity-50"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmittingFollowup || !followupText.trim()}
-                    className="p-1.5 rounded-lg bg-[var(--accent-color)] text-white hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSubmittingFollowup ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Send className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                </form>
-              </div>
+                  {isSubmittingFollowup ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Send className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </form>
             </div>
 
           </div>
